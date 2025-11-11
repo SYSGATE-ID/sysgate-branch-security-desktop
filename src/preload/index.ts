@@ -1,12 +1,19 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  getMyConfig: async () => {
+    return await ipcRenderer.invoke('get-my-config')
+  },
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+  getImage: async () => {
+    return await ipcRenderer.invoke('get-image-path')
+  },
+  getImageBase64: async (filename: string) => ipcRenderer.invoke('get-image-base64', filename)
+}
+
+// Gunakan contextBridge
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -15,8 +22,10 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore (define in dts)
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   window.api = api
 }
