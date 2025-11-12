@@ -10,6 +10,7 @@ import {
 import { Toaster } from 'sonner'
 
 import { Sidebar } from './components/core/Sidebar'
+import { TitleBar } from './components/core/TitleBar'
 import { HomePage, LoginPage } from './pages'
 import { useConfigStore } from './store/configProvider'
 
@@ -51,13 +52,21 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
-      <Sidebar
-        onTabChange={handleTabChange}
-        onLogout={handleLogout}
-        onProfileClick={handleProfileClick}
-      />
-      <main className="flex-1 bg-slate-100 dark:bg-slate-900 p-6 overflow-y-auto">{children}</main>
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
+      {/* Custom Title Bar */}
+      <TitleBar />
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          onTabChange={handleTabChange}
+          onLogout={handleLogout}
+          onProfileClick={handleProfileClick}
+        />
+        <main className="flex-1 bg-slate-100 dark:bg-slate-900 p-6 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

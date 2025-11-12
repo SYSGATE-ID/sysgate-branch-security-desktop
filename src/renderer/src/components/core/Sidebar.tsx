@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <TooltipProvider delayDuration={0}>
       <aside
-        className="flex flex-col bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 h-screen w-16 shadow-sm"
+        className="flex flex-col bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 w-16 shadow-sm"
         aria-label="Sidebar navigation"
       >
         {/* Logo/Brand */}

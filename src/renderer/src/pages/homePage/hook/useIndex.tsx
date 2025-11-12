@@ -1,6 +1,35 @@
 import { useEffect, useState } from 'react'
-import { FileText, Clock, CheckCircle, XCircle, Ticket, type LucideIcon } from 'lucide-react'
-import type { IDashboardData, IResponseDashboard } from '@interface/config.interface'
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Ticket,
+  type LucideIcon,
+  ArrowUpDown,
+  MoreHorizontal,
+  Pencil,
+  Trash2
+} from 'lucide-react'
+import type { IDashboardData, IPagination, IResponseDashboard } from '@interface/config.interface'
+import VisitorService from '@renderer/services/visitorService'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ColumnDef, SortingState } from '@tanstack/react-table'
+import { optionInitialLimit, timeDebounce } from '@renderer/utils/optionsData'
+import { IPayloadAgreement, IVisitor } from '@renderer/interface/visitor.interface'
+import { useDebounce } from '@uidotdev/usehooks'
+import { useTableInstance } from '@renderer/components/core/useTableDataInstance'
+import { AxiosError } from 'axios'
+import { IErrorResponse } from '@renderer/interface/response.interface'
+import { convertStatusVisitor, formatDateTime, toPlus62 } from '@renderer/utils/myFunctions'
+import { Button } from '@renderer/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@renderer/components/ui/dropdown-menu'
+import { toast } from 'sonner'
 
 const apiUrl = import.meta.env.VITE_API_URL as string
 
@@ -16,13 +45,55 @@ interface StatItem {
   iconBg: string
 }
 
-interface UseDashboardReturn {
-  statistic: IDashboardData | null
-  stats: StatItem[]
-}
-
-export const useIndex = (): UseDashboardReturn => {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const useIndex = () => {
   const [statistic, setStatistic] = useState<IDashboardData | null>(null)
+  const visitorService = VisitorService()
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [sorting, setSorting] = useState<SortingState>([])
+
+  const initialPage = Number(searchParams.get('page')) || 1
+  const initialLimit = Number(searchParams.get('limit')) || optionInitialLimit
+  const initialSearch = searchParams.get('search') || ''
+
+  const [data, setData] = useState<IVisitor[]>([])
+  const [totalRows, setTotalRows] = useState(0)
+  const [search, setSearch] = useState(initialSearch)
+  const debouncedSearch = useDebounce(search, timeDebounce)
+
+  const [pagination, setPagination] = useState<IPagination>({
+    page: initialPage,
+    limit: initialLimit
+  })
+
+  const totalPages = Math.ceil(totalRows / pagination.limit) || 1
+
+  const [loading, setLoading] = useState({
+    fetchData: false,
+    deleteData: false,
+    actionPermission: false
+  })
+
+  const [selectedData, setSelectedData] = useState<IVisitor | null>(null)
+  const [openDialog, setOpenDialog] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean
+    id: number | null
+  }>({
+    open: false,
+    id: null
+  })
+
+  // Perbaikan: Gunakan useEffect untuk sinkronisasi URL params dengan state
+  useEffect(() => {
+    const page = Number(searchParams.get('page')) || 1
+    const limit = Number(searchParams.get('limit')) || optionInitialLimit
+    const searchParam = searchParams.get('search') || ''
+
+    setPagination({ page, limit })
+    setSearch(searchParam)
+  }, [searchParams])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -55,6 +126,341 @@ export const useIndex = (): UseDashboardReturn => {
       eventSource.close()
     }
   }, [])
+
+  const handlePageChange = (newPage: number): void => {
+    setSearchParams({
+      page: newPage.toString(),
+      limit: pagination.limit.toString(),
+      search: debouncedSearch
+    })
+  }
+
+  const handleLimitChange = (newLimit: number): void => {
+    setSearchParams({
+      page: '1',
+      limit: newLimit.toString(),
+      search: debouncedSearch
+    })
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [debouncedSearch, pagination.page, pagination.limit]) // Pastikan pagination.page dan pagination.limit sebagai dependency
+
+  const fetchData = async (): Promise<void> => {
+    try {
+      setLoading((p) => ({ ...p, fetchData: true }))
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: debouncedSearch
+      }
+
+      const response = await visitorService.getAllVisitors(params)
+
+      if (response.status_code === 200) {
+        setData(response.data || [])
+        setTotalRows(response.meta?.total || 0)
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      toast('Gagal Memuat Data', {
+        description: axiosError.response?.data?.message || 'Terjadi kesalahan saat memuat data.'
+      })
+    } finally {
+      setLoading((p) => ({ ...p, fetchData: false }))
+    }
+  }
+
+  const handleSearch = (value: string): void => {
+    setSearchParams({
+      page: '1',
+      limit: pagination.limit.toString(),
+      search: value
+    })
+  }
+
+  const fetchDetailData = async (id: number): Promise<void> => {
+    try {
+      setLoading((prev) => ({ ...prev, fetchDetail: true }))
+      const response = await visitorService.getDetailVisitor(id)
+      if (response.status_code === 200) {
+        const data = response.data as IVisitor
+        setSelectedData(data)
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      const message = axiosError.response?.data?.message || 'Gagal memuat data!'
+      toast('Gagal Memuat Data', {
+        description: message
+      })
+    } finally {
+      setLoading((prev) => ({ ...prev, fetchDetail: false }))
+    }
+  }
+
+  const handleApprove = async (id: string, reason: string): Promise<void> => {
+    try {
+      setLoading({ ...loading, actionPermission: true })
+      const payload: IPayloadAgreement = {
+        judge_reason: reason
+      }
+      const response = await visitorService.approveVisitor(id, payload)
+      if (response.status_code === 200) {
+        await fetchDetailData(response.data!.id)
+        await fetchData()
+        toast(response.message, {
+          description: 'Data berhasil disetujui.'
+        })
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      toast('Gagal Approve Data', {
+        description: axiosError.response?.data?.message || 'Terjadi kesalahan saat approve data.'
+      })
+    } finally {
+      setLoading({ ...loading, actionPermission: false })
+    }
+  }
+
+  const handleReject = async (id: string, reason: string): Promise<void> => {
+    try {
+      setLoading({ ...loading, actionPermission: true })
+      const payload: IPayloadAgreement = {
+        judge_reason: reason
+      }
+      const response = await visitorService.denyVisitor(id, payload)
+      if (response.status_code === 200) {
+        await fetchDetailData(response.data!.id)
+        await fetchData()
+        toast(response.message, {
+          description: 'Data berhasil ditolak.'
+        })
+        await fetchData()
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      toast('Gagal penolakan Data', {
+        description: axiosError.response?.data?.message || 'Terjadi kesalahan saat penolakan data.'
+      })
+    } finally {
+      setLoading({ ...loading, actionPermission: false })
+    }
+  }
+
+  const handleDeleteData = async (id: number): Promise<void> => {
+    try {
+      setLoading((p) => ({ ...p, deleteData: true }))
+      const response = await visitorService.deleteVisitor(id)
+
+      if (response.status_code === 200) {
+        toast(response.message, {
+          description: 'Data berhasil dihapus.'
+        })
+        await fetchData()
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      toast('Gagal Menghapus', {
+        description: axiosError.response?.data?.message || 'Terjadi kesalahan saat menghapus data.'
+      })
+    } finally {
+      setLoading((p) => ({ ...p, deleteData: false }))
+      setConfirmDelete({ open: false, id: null })
+    }
+  }
+
+  const handleReSendTicket = async (data: IVisitor, tipe: string): Promise<void> => {
+    if (tipe === 'whatsapp') {
+      const message = `
+Halo ${data.full_name},
+
+Tiket Anda telah *disetujui*
+Berikut detail tiket Anda:
+
+Kode Tiket: ${data.code}
+Jadwal Kedatangan: ${formatDateTime(data.reservation_at)}
+
+Silakan tunjukkan kode tiket ini saat kedatangan.
+Terima kasih.
+      `
+
+      window.open(
+        `https://wa.me/${toPlus62(data.phone)}?text=${encodeURIComponent(message)}`,
+        '_blank'
+      )
+    } else if (tipe === 'gmail') {
+      try {
+        const response = await visitorService.sendEmailTicketVisitor(data.code)
+        if (response.status_code === 200) {
+          toast('Tiket Berhasil Dikirim', {
+            description: response.message || 'Tiket berhasil dikirim ulang!'
+          })
+        } else {
+          toast('Tiket Gagal Dikirim', {
+            description: response.message || 'Tiket gagal dikirim ulang!'
+          })
+        }
+      } catch (error) {
+        const axiosError = error as AxiosError<IErrorResponse>
+        const errorData = axiosError.response?.data?.error
+        const message =
+          typeof errorData === 'string'
+            ? errorData
+            : Object.values(errorData || {}).flat()[0] || 'Terjadi kesalahan pada server!'
+        toast('Gagal Kirim Ulang Tiket', {
+          description: message || 'Tiket gagal dikirim ulang!'
+        })
+      }
+    }
+  }
+
+  const columns: ColumnDef<IVisitor>[] = [
+    {
+      accessorKey: 'reservation_at',
+      header: ({ column }) => (
+        <div className="w-[100px] text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="text-white font-semibold hover:bg-transparent"
+          >
+            Jadwal <ArrowUpDown className="ml-2 h-4 w-4 opacity-60 text-white" />
+          </Button>
+        </div>
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm">{formatDateTime(row.original.reservation_at)}</span>
+      ),
+      size: 300
+    },
+    {
+      accessorKey: 'full_name',
+      header: ({ column }) => (
+        <div className="w-[150px] text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="text-white font-semibold hover:bg-transparent"
+          >
+            Nama Pengunjung <ArrowUpDown className="ml-2 h-4 w-4 opacity-60 text-white" />
+          </Button>
+        </div>
+      ),
+      cell: ({ row }) => (
+        <button
+          onClick={async () => {
+            await fetchDetailData(row.original.id)
+            setOpenDialog(true)
+          }}
+          className="text-blue-600 font-medium hover:underline transition-colors"
+        >
+          {row.original.full_name}
+        </button>
+      ),
+      size: 220
+    },
+    {
+      accessorKey: 'vehicle_plate',
+      header: ({ column }) => (
+        <div className="w-[100px] text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="text-white font-semibold hover:bg-transparent"
+          >
+            Plat Kendaraan <ArrowUpDown className="ml-2 h-4 w-4 opacity-60 text-white" />
+          </Button>
+        </div>
+      ),
+      cell: ({ row }) => <span className="text-sm">{row.original.vehicle_plate}</span>,
+      size: 250
+    },
+    {
+      accessorKey: 'phone',
+      header: ({ column }) => (
+        <div className="w-[100px] text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="text-white font-semibold hover:bg-transparent"
+          >
+            No. Telp <ArrowUpDown className="ml-2 h-4 w-4 opacity-60 text-white" />
+          </Button>
+        </div>
+      ),
+      cell: ({ row }) => <span className="text-sm">{row.original.phone}</span>,
+      size: 160
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <div className="w-[50px] text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="text-white font-semibold hover:bg-transparent"
+          >
+            Status <ArrowUpDown className="ml-2 h-4 w-4 opacity-60 text-white" />
+          </Button>
+        </div>
+      ),
+      cell: ({ row }) => <span>{convertStatusVisitor(row.original.status)}</span>,
+      size: 120
+    },
+    {
+      size: 50,
+      id: 'actions',
+      header: () => <div className="text-white font-semibold hover:bg-transparent">Aksi</div>,
+      cell: ({ row }) => {
+        const user = row.original
+        return (
+          <div className="w-[30px] text-left">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+                >
+                  <MoreHorizontal size={256} strokeWidth={3} className="text-blue-500 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                className="w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+              >
+                <DropdownMenuItem
+                  onClick={() => navigate(`update/${user.id}`)}
+                  className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                >
+                  <Pencil className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                  Edit
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => setConfirmDelete({ open: true, id: user.id })}
+                  className="flex items-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 cursor-pointer"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Hapus
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )
+      }
+    }
+  ]
+
+  const table = useTableInstance({
+    data,
+    columns,
+    totalRows,
+    pagination,
+    sorting,
+    setSorting
+  })
 
   const stats: StatItem[] = [
     {
@@ -114,5 +520,29 @@ export const useIndex = (): UseDashboardReturn => {
     }
   ]
 
-  return { statistic, stats }
+  return {
+    statistic,
+    stats,
+    data,
+    totalRows,
+    pagination,
+    loading,
+    handleSearch,
+    handleDeleteData,
+    fetchData,
+    columns,
+    table,
+    handlePageChange,
+    handleLimitChange,
+    selectedData,
+    setSelectedData,
+    openDialog,
+    setOpenDialog,
+    confirmDelete,
+    setConfirmDelete,
+    totalPages,
+    handleApprove,
+    handleReject,
+    handleReSendTicket
+  }
 }
