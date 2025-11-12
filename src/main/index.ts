@@ -53,12 +53,12 @@ ipcMain.handle('get-my-config', async () => {
 })
 
 // Dapatkan path folder image
-ipcMain.handle('get-image-path', async () => {
-  const imagePath = is.dev
-    ? join(__dirname, '../../resources/assets/images')
-    : join(process.resourcesPath, 'resources/assets/images')
+ipcMain.handle('get-assets-path', async () => {
+  const assetsPathConfig = is.dev
+    ? join(__dirname, '../../resources/assets')
+    : join(process.resourcesPath, 'resources/assets')
 
-  return imagePath
+  return assetsPathConfig
 })
 
 // This method will be called when Electron has finished

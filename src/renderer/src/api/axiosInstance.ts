@@ -1,7 +1,8 @@
 // hooks/useAxiosInstance.ts
-import { useToast } from '@store/ToastContext'
+import { useConfigStore } from '@renderer/store/configProvider'
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 interface ErrorResponse {
   message?: string
@@ -10,11 +11,12 @@ interface ErrorResponse {
 
 export const useAxiosInstance = (): AxiosInstance => {
   const navigate = useNavigate()
-  const { showToast } = useToast()
+  const { config } = useConfigStore.getState() // langsung akses tanpa hook
+  const baseURL = config?.api_url || 'http://localhost/sysgate-branch'
   const token = localStorage.getItem('token')
 
   const instance = axios.create({
-    baseURL: '/api/v1',
+    baseURL: `${baseURL}/api/v1`,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -29,14 +31,22 @@ export const useAxiosInstance = (): AxiosInstance => {
 
       if (status === 401) {
         localStorage.clear()
-        showToast('Akses Ditolak', 'Harap login terlebih dahulu.', 'error')
+        toast('Akses Ditolak', {
+          description: `Harap login terlebih dahulu.`
+        })
         navigate('/login')
       } else if (status === 403) {
-        showToast('Akses Ditolak', 'Anda tidak memiliki izin untuk halaman ini.', 'error')
+        toast('Akses Ditolak', {
+          description: `Anda tidak memiliki izin untuk halaman ini.`
+        })
       } else if (status === 500) {
-        showToast('Kesalahan Server', 'Terjadi kesalahan di server, coba lagi nanti.', 'error')
+        toast('Kesalahan Server', {
+          description: `Terjadi kesalahan di server, coba lagi nanti.`
+        })
       } else if (!error.response) {
-        showToast('Koneksi Gagal', 'Tidak dapat terhubung ke server.', 'error')
+        toast('Koneksi Gagal', {
+          description: `Tidak dapat terhubung ke server.`
+        })
       }
 
       return Promise.reject(error)

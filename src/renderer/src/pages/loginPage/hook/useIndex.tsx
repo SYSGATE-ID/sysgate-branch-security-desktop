@@ -59,7 +59,7 @@ export const useIndex = (): UseIndexReturn => {
         toast('Login Berhasil', {
           description: `Selamat datang ${response.data!.user.username}`
         })
-        navigate('/system')
+        navigate('/')
       } else {
         toast('Login Gagal', {
           description: 'Username/Password yang Anda masukkan salah!'

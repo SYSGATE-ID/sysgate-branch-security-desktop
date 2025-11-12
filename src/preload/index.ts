@@ -8,7 +8,7 @@ const api = {
   },
 
   getImage: async () => {
-    return await ipcRenderer.invoke('get-image-path')
+    return await ipcRenderer.invoke('get-assets-path')
   },
   getImageBase64: async (filename: string) => ipcRenderer.invoke('get-image-base64', filename)
 }

@@ -1,8 +1,4 @@
 {
-  "api_url": "http://192.168.3.199/sistemparkir/_api/api-admin.php",
-  "url_background": "http://192.168.3.199/sistemparkir/imagesfile/wallpaper.jpg",
-  "api_secretcode": "1qaz2wsx3edc",
-  "license": "1945305733",
-  "default_cron_time": "11:41",
-  "refresh_time_data": 30000
+  "api_url": "http://192.168.2.45:3000",
+  "license": "1945305733"
 }
