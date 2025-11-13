@@ -31,20 +31,20 @@ export const useAxiosInstance = (): AxiosInstance => {
 
       if (status === 401) {
         localStorage.clear()
-        toast('Akses Ditolak', {
+        toast.warning('Akses Ditolak', {
           description: `Harap login terlebih dahulu.`
         })
         navigate('/login')
       } else if (status === 403) {
-        toast('Akses Ditolak', {
+        toast.warning('Akses Ditolak', {
           description: `Anda tidak memiliki izin untuk halaman ini.`
         })
       } else if (status === 500) {
-        toast('Kesalahan Server', {
+        toast.error('Kesalahan Server', {
           description: `Terjadi kesalahan di server, coba lagi nanti.`
         })
       } else if (!error.response) {
-        toast('Koneksi Gagal', {
+        toast.error('Koneksi Gagal', {
           description: `Tidak dapat terhubung ke server.`
         })
       }

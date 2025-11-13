@@ -56,19 +56,19 @@ export const useIndex = (): UseIndexReturn => {
       if (response.status_code === 200) {
         localStorage.setItem('userLogin', JSON.stringify(response.data!.user))
         localStorage.setItem('token', response.data!.token)
-        toast('Login Berhasil', {
+        toast.success('Login Berhasil', {
           description: `Selamat datang ${response.data!.user.username}`
         })
         navigate('/')
       } else {
-        toast('Login Gagal', {
+        toast.error('Login Gagal', {
           description: 'Username/Password yang Anda masukkan salah!'
         })
       }
     } catch (error) {
       const axiosError = error as AxiosError<IErrorResponse>
       const message = axiosError.response?.data?.error || 'Terjadi kesalahan pada server!'
-      toast('Login Gagal', {
+      toast.error('Login Gagal', {
         description: message as string
       })
     } finally {

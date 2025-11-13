@@ -13,13 +13,14 @@ import { Sidebar } from './components/core/Sidebar'
 import { TitleBar } from './components/core/TitleBar'
 import { HomePage, LoginPage } from './pages'
 import { useConfigStore } from './store/configProvider'
+import { useTheme } from './components/core/ThemeProvider'
 
 const getToken = (): string | null => localStorage.getItem('token')
 
+/* ---------------------------- Protected Layout ---------------------------- */
 interface ProtectedLayoutProps {
   children: React.ReactNode
 }
-
 const ProtectedLayout: React.FC<ProtectedLayoutProps> = ({ children }) => {
   const location = useLocation()
   const token = getToken()
@@ -31,12 +32,16 @@ const ProtectedLayout: React.FC<ProtectedLayoutProps> = ({ children }) => {
   return <>{children}</>
 }
 
+/* ---------------------------- Sidebar Layout ----------------------------- */
 interface SidebarLayoutProps {
   children: React.ReactNode
 }
-
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   const navigate = useNavigate()
+  const { setTheme, theme } = useTheme()
+
+  const userLogin = localStorage.getItem('userLogin')
+  const userData = userLogin ? JSON.parse(userLogin) : null
 
   const handleLogout = (): void => {
     localStorage.removeItem('token')
@@ -54,7 +59,10 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       {/* Custom Title Bar */}
-      <TitleBar />
+      <TitleBar
+        username={userData && userData.username}
+        onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      />
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
@@ -63,10 +71,23 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
           onLogout={handleLogout}
           onProfileClick={handleProfileClick}
         />
-        <main className="flex-1 bg-slate-100 dark:bg-slate-900 p-6 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 bg-slate-100 dark:bg-black p-6 overflow-y-auto">{children}</main>
       </div>
+    </div>
+  )
+}
+
+/* ----------------------------- Login Layout ------------------------------ */
+interface LoginLayoutProps {
+  children: React.ReactNode
+}
+const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
+  return (
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
+      <TitleBar />
+      <main className="flex flex-1 items-center justify-center bg-slate-100 dark:bg-slate-900 p-6">
+        {children}
+      </main>
     </div>
   )
 }
@@ -85,8 +106,15 @@ const App: React.FC = () => {
     <>
       <Router>
         <Routes>
-          {/* Public Route */}
-          <Route path="/login" element={<LoginPage />} />
+          {/* Public Route - Login */}
+          <Route
+            path="/login"
+            element={
+              <LoginLayout>
+                <LoginPage />
+              </LoginLayout>
+            }
+          />
 
           {/* Protected Routes */}
           <Route

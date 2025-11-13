@@ -36,7 +36,7 @@ function createWindow(): void {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize()
     } else {
-      mainWindow.maximize()
+      mainWindow.setFullScreen(true)
     }
   })
 

@@ -11,6 +11,8 @@ import {
   ItemMedia,
   ItemTitle
 } from '@renderer/components/ui/item'
+import { Button } from '@renderer/components/ui/button'
+import { ModalConfirm } from './components/modalConfirm'
 
 export const HomePage: React.FC = () => {
   const {
@@ -31,10 +33,43 @@ export const HomePage: React.FC = () => {
     handleDeleteData,
     handleApprove,
     handleReject,
-    handleReSendTicket
+    handleReSendTicket,
+    statistic,
+    stats,
+    isOpenModalConfirm,
+    setIsOpenModalConfirm
   } = useIndex()
 
   const dataLog = [
+    {
+      name: 'Mini Bus',
+      tipe: 'Member',
+      plat: '',
+      gate: 'IN',
+      time: '10:30'
+    },
+
+    {
+      name: 'Truk',
+      tipe: 'Umum',
+      plat: 'B4432DGA',
+      gate: 'OUT',
+      time: '10:25'
+    },
+    {
+      name: 'Mini Bus',
+      tipe: 'Umum',
+      plat: 'B1342GFD',
+      gate: 'IN',
+      time: '10:20'
+    },
+    {
+      name: 'Mini Bus',
+      tipe: 'Member',
+      plat: '',
+      gate: 'IN',
+      time: '10:30'
+    },
     {
       name: 'Mini Bus',
       tipe: 'Member',
@@ -78,15 +113,6 @@ export const HomePage: React.FC = () => {
       gate: 'IN',
       time: '10:20'
     }
-  ]
-
-  const stats = [
-    { label: 'Total', value: 10 },
-    { label: 'Menunggu', value: 8 },
-    { label: 'Disetujui', value: 2 },
-    { label: 'Sedang Digunakan', value: 15 },
-    { label: 'Ditolak', value: 5 },
-    { label: 'Selesai', value: 3 }
   ]
 
   return (
@@ -159,23 +185,34 @@ export const HomePage: React.FC = () => {
         <MyContainer className="rounded-lg border border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
             <h2 className="text-base font-bold text-blue-900 dark:text-white">
-              Daftar Pengunjung Terbaru
+              Data Statistik Hari Ini
             </h2>
           </div>
 
-          <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
-              >
-                <div className="text-3xl font-semibold text-gray-900 dark:text-white mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
+          {statistic ? (
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {stats.map((item, index) => {
+                // const Icon = stat.icon
+                return (
+                  <div key={index} className={`${item.bgLight} ${item.bgDark} rounded-lg p-4`}>
+                    <div
+                      className={`${item.textLight} ${item.textDark} text-3xl font-semibold mb-1`}
+                    >
+                      {item.value}
+                    </div>
+                    <div className={`text-sm text-gray-600 dark:text-gray-400`}>{item.label}</div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                <p className="text-slate-600 dark:text-slate-400 font-medium"></p>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </MyContainer>
 
         {/* Visitor Table */}
@@ -185,6 +222,13 @@ export const HomePage: React.FC = () => {
               Daftar Pengunjung Terbaru
             </h2>
           </div>
+
+          <Button
+            onClick={() => setIsOpenModalConfirm(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Buka Modal Approval
+          </Button>
 
           <div className="flex-1 overflow-y-auto p-5">
             <TableComponent
@@ -217,6 +261,13 @@ export const HomePage: React.FC = () => {
               confirmColor="bg-red-600 hover:bg-red-700 text-white"
               onConfirm={() => confirmDelete.id && handleDeleteData(confirmDelete.id)}
               onOpenChange={(open) => setConfirmDelete({ open, id: null })}
+            />
+
+            <ModalConfirm
+              handleApprove={handleApprove}
+              handleReject={handleReject}
+              isOpenModalConfirm={isOpenModalConfirm}
+              setIsOpenModalConfirm={setIsOpenModalConfirm}
             />
           </div>
         </MyContainer>
