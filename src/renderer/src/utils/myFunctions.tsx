@@ -2,6 +2,7 @@
 import React from 'react'
 import { Badge } from '@renderer/components/ui/badge'
 import moment from 'moment/min/moment-with-locales'
+import { MD5 } from 'crypto-js'
 
 moment.locale('id')
 
@@ -196,5 +197,30 @@ export const convertStatusTicket: Record<string, { label: string; className: str
   DENIED: {
     label: 'DITOLAK',
     className: 'bg-red-500 hover:bg-red-600 text-neutral-50'
+  }
+}
+
+export const getDigitMD5Serial = (nilai: string): string => {
+  const onlyNumber = nilai.replace(/\D/g, '')
+
+  // Mengambil 10 digit pertama (jika tersedia)
+  const first10Digits = onlyNumber.slice(0, 10)
+
+  // Mengisi dengan 0 jika panjangnya kurang dari 10
+  const digitCount = first10Digits.length
+  if (digitCount < 10) {
+    const sisaDigit = 10 - digitCount
+    const nol = '0'.repeat(sisaDigit)
+    return first10Digits + nol
+  } else {
+    return first10Digits
+  }
+}
+
+export const recursiveMD5 = (text: string, rounds: number): string => {
+  if (rounds === 0) {
+    return text
+  } else {
+    return recursiveMD5(MD5(text).toString(), rounds - 1)
   }
 }

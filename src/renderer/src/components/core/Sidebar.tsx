@@ -54,12 +54,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab = 'home', onTabChang
         {/* Navigation Items */}
         <nav className="flex-1 py-4">
           <ul className="flex flex-col gap-2 px-2">
-            {navItems.map((item) => {
+            {navItems.map((item, index) => {
               const Icon = item.icon
               const isActive = active === item.id
 
               return (
-                <li key={item.id}>
+                <li key={index}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button

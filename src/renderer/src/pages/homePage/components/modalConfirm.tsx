@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/comp
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { ScrollArea } from '@renderer/components/ui/scroll-area'
-import { CheckCircle2, XCircle, Clock, Calendar } from 'lucide-react'
+import { CheckCircle2, XCircle } from 'lucide-react'
 
 interface ModalConfirmProps {
   isOpenModalConfirm: boolean
@@ -57,7 +57,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
         </DialogHeader>
 
         <ScrollArea className="max-h-[calc(95vh-80px)]">
-          <div className="p pb-8 space-y-8">
+          <div className="p space-y-8">
             {/* Photos side-by-side on top */}
             <div className="grid grid-cols-2 gap-5 mb-1">
               {/* Foto Masuk */}
@@ -81,15 +81,15 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
             <div className="p-5 pt-0">
               {/* Visitor info below photos */}
               <div className="rounded-xl">
-                <div className="p-6 space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                <div className="px-6 pt-3 space-y-6">
+                  <div className="grid grid-cols-2 my-3 mb-4 gap-6">
                     <div>
                       <p className="text-sm text-slate-500 font-medium">Nama Lengkap</p>
-                      <p className="text-base font-semibold text-slate-800">{visitorData.name}</p>
+                      <p className="text-black font-bold">{visitorData.name}</p>
                     </div>
                     <div>
                       <p className="text-sm text-slate-500 font-medium">Nomor Kendaraan</p>
-                      <p className="text-base font-semibold text-slate-800 font-mono bg-slate-100 px-3 py-1.5 rounded-lg inline-block">
+                      <p className="text-black font-bold font-mono bg-slate-100 px-3 py-1.5 rounded-lg inline-block">
                         {visitorData.plateNumber}
                       </p>
                     </div>
@@ -97,40 +97,33 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
 
                   <Separator className="bg-slate-200" />
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 my-3 mb-4 gap-6">
                     <div>
                       <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
                         Tanggal
                       </p>
-                      <p className="text-base text-slate-700">{visitorData.entryDate}</p>
+                      <p className="text-black font-bold">{visitorData.entryDate}</p>
                     </div>
                     <div>
                       <p className="text-sm text-slate-500 font-medium">Keperluan</p>
-                      <p className="text-base text-slate-700">{visitorData.purpose}</p>
+                      <p className="text-black font-bold">{visitorData.purpose}</p>
                     </div>
                   </div>
 
                   <Separator className="bg-slate-200" />
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 my-3 mb-4 gap-6">
                     <div>
                       <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
                         Waktu Masuk
                       </p>
-                      <p className="text-base font-semibold text-green-600">
-                        {visitorData.entryTime}
-                      </p>
+                      <p className="font-bold text-green-600">{visitorData.entryTime}</p>
                     </div>
                     <div>
                       <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
                         Waktu Keluar
                       </p>
-                      <p className="text-base font-semibold text-orange-600">
-                        {visitorData.exitTime}
-                      </p>
+                      <p className="font-bold text-orange-600">{visitorData.exitTime}</p>
                     </div>
                   </div>
                 </div>

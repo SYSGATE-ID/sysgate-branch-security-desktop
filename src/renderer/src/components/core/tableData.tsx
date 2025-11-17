@@ -58,14 +58,14 @@ export function TableComponent<TData>({
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-700 text-white">
-              {table.getHeaderGroups().map((headerGroup) => (
+              {table.getHeaderGroups().map((headerGroup, index) => (
                 <TableRow
-                  key={headerGroup.id}
+                  key={index}
                   className="border-b dark:border-slate-700 hover:bg-transparent !hover:bg-transparent"
                 >
-                  {headerGroup.headers.map((header) => (
+                  {headerGroup.headers.map((header, index) => (
                     <TableHead
-                      key={header.id}
+                      key={index}
                       className="text-sm font-semibold text-white py-4 px-2 relative select-none"
                       style={{
                         width: header.getSize(),
@@ -94,16 +94,16 @@ export function TableComponent<TData>({
               {data.length > 0
                 ? table.getRowModel().rows.map((row, index) => (
                     <TableRow
-                      key={row.id}
+                      key={index}
                       className={`transition-colors duration-150 hover:bg-blue-50 dark:hover:bg-slate-700 ${
                         index % 2 === 0
                           ? 'bg-white dark:bg-neutral-900'
                           : 'bg-slate-50 dark:bg-slate-800'
                       }`}
                     >
-                      {row.getVisibleCells().map((cell) => (
+                      {row.getVisibleCells().map((cell, index) => (
                         <TableCell
-                          key={cell.id}
+                          key={index}
                           style={{ width: cell.column.getSize() || '100px' }}
                           className="text-sm text-slate-700 dark:text-slate-100 py-4 px-5"
                         >
@@ -139,8 +139,8 @@ export function TableComponent<TData>({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {optionsPagination.map((val) => (
-                <SelectItem className="h-[45px]" key={val} value={val.toString()}>
+              {optionsPagination.map((val, index) => (
+                <SelectItem className="h-[45px]" key={index} value={val.toString()}>
                   {val}
                 </SelectItem>
               ))}

@@ -5,6 +5,7 @@ import type { IPayloadLogin } from '@interface/auth.interface'
 import type { IErrorResponse } from '@interface/response.interface'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
+import { UseGlobalLayout } from '@renderer/components/core/hook/useGlobalLayout'
 
 interface UseIndexReturn {
   formLogin: IPayloadLogin
@@ -17,7 +18,7 @@ interface UseIndexReturn {
 export const useIndex = (): UseIndexReturn => {
   const navigate = useNavigate()
   const authService = AuthService()
-
+  const { licenseIs } = UseGlobalLayout()
   const [formLogin, setFormLogin] = useState<IPayloadLogin>({
     username: '',
     password: ''
@@ -34,6 +35,15 @@ export const useIndex = (): UseIndexReturn => {
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
+
+    if (!licenseIs) {
+      toast.error('Akses ditolak!', {
+        description: `License key tidak valid! Harap hubungi SISTEMPARKIR.COM`
+      })
+      setFormLogin({ username: '', password: '' })
+      setLoading({ submit: false })
+      return
+    }
 
     const requiredFields: (keyof IPayloadLogin)[] = ['username', 'password']
     const newErrors: Record<string, string> = {}

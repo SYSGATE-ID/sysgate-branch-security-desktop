@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { readFileSync } from 'fs'
+import nodeChildProcess from 'child_process'
 
 function createWindow(): void {
   // Create the browser window.
@@ -42,6 +43,7 @@ function createWindow(): void {
 
   ipcMain.on('window-close', () => {
     mainWindow.close()
+    mainWindow.webContents.executeJavaScript(`localStorage.clear();`).catch(() => {})
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -97,6 +99,19 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // GET UUID DEVICE
+  ipcMain.on('get-deviceID', (event) => {
+    const script = nodeChildProcess.spawn('cmd.exe', ['/c', 'wmic csproduct get uuid'])
+
+    script.stdout.on('data', (data) => {
+      event.sender.send('uuid-response', data.toString().trim())
+    })
+
+    script.stderr.on('data', (err) => {
+      event.sender.send('uuid-response', `Error: ${err.toString().trim()}`)
+    })
+  })
 
   createWindow()
 

@@ -130,8 +130,8 @@ export const HomePage: React.FC = () => {
           {/* Activity List */}
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-3">
-              {dataLog.map((item) => (
-                <Item key={item.name} variant="outline" asChild role="listitem">
+              {dataLog.map((item, index) => (
+                <Item key={index} variant="outline" asChild role="listitem">
                   <a href="#">
                     <ItemMedia variant="image">
                       <img

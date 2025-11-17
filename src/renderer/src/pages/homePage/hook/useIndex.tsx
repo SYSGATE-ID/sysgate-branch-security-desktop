@@ -128,7 +128,7 @@ export const useIndex = () => {
 
   useEffect(() => {
     fetchData()
-  }, [debouncedSearch, pagination.page, pagination.limit]) // Pastikan pagination.page dan pagination.limit sebagai dependency
+  }, [debouncedSearch, pagination.page, pagination.limit])
 
   const fetchData = async (): Promise<void> => {
     try {
