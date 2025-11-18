@@ -10,7 +10,6 @@ import {
   DialogFooter
 } from '@renderer/components/ui/dialog'
 import { Button } from '@renderer/components/ui/button'
-import { MyAlertDialog } from './MyAlertDialog'
 
 interface TitleBarProps {
   title?: string
@@ -163,15 +162,27 @@ export const TitleBar: React.FC<TitleBarProps> = ({
       </Dialog>
 
       {/* CONFIRM CLOSE MODAL */}
-      <MyAlertDialog
-        open={showConfirmClose}
-        title="Keluar Aplikasi"
-        description="Apakah Anda yakin ingin keluar? Semua data sesi akan dihapus."
-        confirmText="Keluar"
-        confirmColor="bg-red-600 hover:bg-red-700 text-white"
-        onConfirm={confirmClose}
-        onOpenChange={setShowConfirmClose}
-      />
+      <Dialog open={showConfirmClose} onOpenChange={setShowConfirmClose}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">Keluar Aplikasi</DialogTitle>
+          </DialogHeader>
+
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            Apakah Anda yakin ingin keluar dari aplikasi?
+          </div>
+
+          <DialogFooter className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowConfirmClose(false)}>
+              Batal
+            </Button>
+
+            <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={confirmClose}>
+              Keluar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

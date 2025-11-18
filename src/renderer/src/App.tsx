@@ -1,27 +1,23 @@
-import React, { useEffect } from 'react'
-import {
-  MemoryRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-  useLocation,
-  Navigate
-} from 'react-router-dom'
+import React, { JSX, useEffect } from 'react'
+import { MemoryRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'sonner'
 
 import { Sidebar } from './components/core/Sidebar'
 import { TitleBar } from './components/core/TitleBar'
-import { HomePage, LoginPage } from './pages'
 import { useConfigStore } from './store/configProvider'
 import { useTheme } from './components/core/ThemeProvider'
+import { appRoutes } from './routes/appRoutes'
+import { IAppRoute } from './interface/config.interface'
 
+// ================= TOKEN =================
 const getToken = (): string | null => localStorage.getItem('token')
 
-/* ---------------------------- Protected Layout ---------------------------- */
+// ================= PROTECTED LAYOUT =================
 interface ProtectedLayoutProps {
   children: React.ReactNode
 }
-const ProtectedLayout: React.FC<ProtectedLayoutProps> = ({ children }) => {
+
+const ProtectedLayout = ({ children }: ProtectedLayoutProps): JSX.Element => {
   const location = useLocation()
   const token = getToken()
 
@@ -32,73 +28,97 @@ const ProtectedLayout: React.FC<ProtectedLayoutProps> = ({ children }) => {
   return <>{children}</>
 }
 
-/* ---------------------------- Sidebar Layout ----------------------------- */
+// ================= SIDEBAR LAYOUT =================
 interface SidebarLayoutProps {
   children: React.ReactNode
 }
-const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
-  const navigate = useNavigate()
-  const { setTheme, theme } = useTheme()
+
+const SidebarLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
+  const { theme, setTheme } = useTheme()
 
   const userLogin = localStorage.getItem('userLogin')
   const userData = userLogin ? JSON.parse(userLogin) : null
 
   const handleLogout = (): void => {
     localStorage.removeItem('token')
-    navigate('/login')
-  }
-
-  const handleProfileClick = (): void => {
-    console.log('Profile clicked')
-  }
-
-  const handleTabChange = (tabId: string): void => {
-    console.log('Tab changed to:', tabId)
+    window.location.href = '/login'
   }
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
-      {/* Custom Title Bar */}
       <TitleBar
-        username={userData && userData.username}
+        username={userData?.username}
         onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       />
 
-      {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          onTabChange={handleTabChange}
-          onLogout={handleLogout}
-          onProfileClick={handleProfileClick}
-        />
+        <Sidebar onLogout={handleLogout} />
         <main className="flex-1 bg-slate-100 dark:bg-black p-6 overflow-y-auto">{children}</main>
       </div>
     </div>
   )
 }
 
-/* ----------------------------- Login Layout ------------------------------ */
+// ================= LOGIN LAYOUT =================
 interface LoginLayoutProps {
   children: React.ReactNode
 }
-const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
+
+const LoginLayout = ({ children }: LoginLayoutProps): JSX.Element => (
+  <div className="flex flex-col h-screen w-screen overflow-hidden">
+    <TitleBar />
+    <main className="flex flex-1 items-center justify-center bg-slate-100 dark:bg-slate-900">
+      {children}
+    </main>
+  </div>
+)
+
+const CustomLayout = ({ children }: LoginLayoutProps): JSX.Element => (
+  <div className="flex flex-col h-screen w-screen overflow-hidden">
+    <TitleBar />
+    <main className="">{children}</main>
+  </div>
+)
+
+// ================= ROUTE WRAPPER =================
+const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
+  const { element, protected: isProtected, path } = route
+
+  // PUBLIC (login)
+  if (!isProtected && path === '/login') {
+    return <Route key={key} path={path} element={<LoginLayout>{element}</LoginLayout>} />
+  }
+
+  // PUBLIC (lainnya)
+  if (!isProtected) {
+    return (
+      <>
+        <Route key={key} path={path} element={<CustomLayout>{element}</CustomLayout>} />
+      </>
+    )
+  }
+
+  // PROTECTED
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden">
-      <TitleBar />
-      <main className="flex flex-1 items-center justify-center bg-slate-100 dark:bg-slate-900 p-6">
-        {children}
-      </main>
-    </div>
+    <Route
+      key={key}
+      path={path}
+      element={
+        <ProtectedLayout>
+          <SidebarLayout>{element}</SidebarLayout>
+        </ProtectedLayout>
+      }
+    />
   )
 }
 
-/* ----------------------------------- App ---------------------------------- */
+// ================= APP =================
 const App: React.FC = () => {
-  const { isLoading, fetchConfig } = useConfigStore()
+  const { fetchConfig, isLoading } = useConfigStore()
 
   useEffect(() => {
     fetchConfig()
-  }, [fetchConfig])
+  }, [])
 
   if (isLoading) return <p>Loading...</p>
 
@@ -106,38 +126,16 @@ const App: React.FC = () => {
     <>
       <Router>
         <Routes>
-          {/* Public Route - Login */}
-          <Route
-            path="/login"
-            element={
-              <LoginLayout>
-                <LoginPage />
-              </LoginLayout>
-            }
-          />
+          {appRoutes.filter((r) => r.active).map((route, i) => renderRoute(route, i))}
 
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedLayout>
-                <SidebarLayout>
-                  <HomePage />
-                </SidebarLayout>
-              </ProtectedLayout>
-            }
-          />
-
-          {/* 404 Page */}
+          {/* 404 */}
           <Route
             path="*"
             element={
               <SidebarLayout>
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
-                    <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2">
-                      404
-                    </h1>
+                    <h1 className="text-4xl font-bold mb-2">404</h1>
                     <p className="text-slate-600 dark:text-slate-400">Page Not Found</p>
                   </div>
                 </div>
@@ -146,6 +144,7 @@ const App: React.FC = () => {
           />
         </Routes>
       </Router>
+
       <Toaster position="top-center" />
     </>
   )

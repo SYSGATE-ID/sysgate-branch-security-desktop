@@ -43,7 +43,7 @@ export const useIndex = () => {
   const [sorting, setSorting] = useState<SortingState>([])
 
   const initialPage = Number(searchParams.get('page')) || 1
-  const initialLimit = Number(searchParams.get('limit')) || optionInitialLimit
+  const initialLimit = 50
   const initialSearch = searchParams.get('search') || ''
 
   const [data, setData] = useState<IVisitor[]>([])

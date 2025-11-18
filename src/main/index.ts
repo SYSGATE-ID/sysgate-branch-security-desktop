@@ -37,7 +37,7 @@ function createWindow(): void {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize()
     } else {
-      mainWindow.setFullScreen(true)
+      mainWindow.maximize()
     }
   })
 
@@ -122,49 +122,6 @@ app.whenReady().then(() => {
   })
 })
 
-// app.whenReady().then(() => {
-//   // Daftarkan protokol "app://"
-//   protocol.registerBufferProtocol('app', (request, respond) => {
-//     const url = request.url.substr(6) // hapus "app://"
-
-//     // Tentukan base path
-//     const basePath = is.dev
-//       ? join(__dirname, '../../resources/assets')
-//       : join(process.resourcesPath, 'assets')
-
-//     const filePath = join(basePath, url)
-
-//     try {
-//       if (!existsSync(filePath)) {
-//         console.error('File not found:', filePath)
-//         respond({ statusCode: 404 })
-//         return
-//       }
-
-//       const data = readFileSync(filePath)
-
-//       // deteksi mime type sederhana
-//       const ext = filePath.split('.').pop()?.toLowerCase()
-//       const mimeType =
-//         ext === 'png'
-//           ? 'image/png'
-//           : ext === 'jpg' || ext === 'jpeg'
-//             ? 'image/jpeg'
-//             : ext === 'svg'
-//               ? 'image/svg+xml'
-//               : 'application/octet-stream'
-
-//       respond({ mimeType, data })
-//     } catch (err) {
-//       console.error('Gagal load file:', err)
-//       respond({ statusCode: 500 })
-//     }
-//   })
-// })
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()

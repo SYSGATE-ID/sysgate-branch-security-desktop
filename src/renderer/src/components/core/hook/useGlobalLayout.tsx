@@ -1,9 +1,11 @@
 import { useConfigStore } from '@renderer/store/configProvider'
 import { getDigitMD5Serial, recursiveMD5 } from '@renderer/utils/myFunctions'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const UseGlobalLayout = () => {
+  const navigate = useNavigate()
   const { config } = useConfigStore.getState()
   const myLicense = config?.license
 
@@ -65,6 +67,11 @@ export const UseGlobalLayout = () => {
       if (e.key === 'F12') {
         e.preventDefault()
         setShowModal(true)
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault()
+        navigate('/logger')
       }
     }
 

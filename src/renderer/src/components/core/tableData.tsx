@@ -29,6 +29,7 @@ interface TableComponentProps<IData> {
   handlePageChange: (newPage: number) => void
   handleLimitChange: (newLimit: number) => void
   totalPages: number
+  withPagiantion?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -40,7 +41,8 @@ export function TableComponent<TData>({
   pagination,
   handlePageChange,
   handleLimitChange,
-  totalPages
+  totalPages,
+  withPagiantion = true
 }: TableComponentProps<TData>) {
   return (
     <>
@@ -128,51 +130,53 @@ export function TableComponent<TData>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between py-4 text-sm">
-        <div className="flex items-center gap-2">
-          <span>Total per page:</span>
-          <Select
-            value={pagination.limit.toString()}
-            onValueChange={(value) => handleLimitChange(Number(value))}
-          >
-            <SelectTrigger className="w-20 h-8" style={{ height: '45px' }}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {optionsPagination.map((val, index) => (
-                <SelectItem className="h-[45px]" key={index} value={val.toString()}>
-                  {val}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <span>
-            Page {pagination.page} of {totalPages}
-          </span>
-
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1 || loading.fetchData}
+      {withPagiantion && (
+        <div className="flex items-center justify-between py-4 text-sm">
+          <div className="flex items-center gap-2">
+            <span>Total per page:</span>
+            <Select
+              value={pagination.limit.toString()}
+              onValueChange={(value) => handleLimitChange(Number(value))}
             >
-              <ChevronLeft />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= totalPages || loading.fetchData}
-            >
-              <ChevronRight />
-            </Button>
+              <SelectTrigger className="w-20 h-8" style={{ height: '45px' }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {optionsPagination.map((val, index) => (
+                  <SelectItem className="h-[45px]" key={index} value={val.toString()}>
+                    {val}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <span>
+              Page {pagination.page} of {totalPages}
+            </span>
+
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1 || loading.fetchData}
+              >
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= totalPages || loading.fetchData}
+              >
+                <ChevronRight />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

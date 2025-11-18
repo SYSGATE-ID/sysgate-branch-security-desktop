@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/comp
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { ScrollArea } from '@renderer/components/ui/scroll-area'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircle2, X, XCircle } from 'lucide-react'
 
 interface ModalConfirmProps {
   isOpenModalConfirm: boolean
@@ -32,14 +32,31 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   return (
     <Dialog open={isOpenModalConfirm} onOpenChange={setIsOpenModalConfirm}>
       <DialogContent className="min-w-full h-[95vh] p-0 rounded-2xl shadow-2xl">
+        <Button
+          onClick={() => setIsOpenModalConfirm(false)}
+          className="
+    absolute top-2 right-2 z-99 
+    bg-slate-700 hover:bg-slate-800 
+    text-white 
+    w-10 h-10 
+    rounded-lg
+    flex items-center justify-center 
+    shadow-lg hover:shadow-xl 
+    transition-all duration-200 
+    hover:scale-105
+  "
+        >
+          <X className="w-6 h-6" />
+        </Button>
+
         <DialogHeader className="h-[60px] px-8 bg-blue-500 rounded-t-xl flex justify-center">
           <DialogTitle className="font-[15px] font-bold text-white flex items-center gap-3">
             Verifikasi Kendaraan Keluar
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex gap-4">
               <Button
                 onClick={() => handleReject('1')}
                 size="lg"
-                className="h-10 bg-red-600 hover:bg-red-700 text-white font-semibold font-[22px] rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="h-10 w-60 bg-red-600 hover:bg-red-700 text-white font-semibold font-[22px] rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
               >
                 <XCircle className="w-6 h-6 mr-2" />
                 Tolak
@@ -47,7 +64,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
               <Button
                 onClick={() => handleApprove('1')}
                 size="lg"
-                className="h-10 bg-green-600 hover:bg-green-700 text-white font-semibold font-[22px] rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                className="h-10 w-100 bg-green-600 hover:bg-green-700 text-white font-semibold font-[22px] rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
               >
                 <CheckCircle2 className="w-6 h-6 mr-2" />
                 Setujui

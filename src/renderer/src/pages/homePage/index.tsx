@@ -3,7 +3,6 @@ import React from 'react'
 import { useIndex } from './hook/useIndex'
 import { TableComponent } from '@renderer/components/core/tableData'
 import { ModalDetail } from './components/modalDetail'
-import { MyAlertDialog } from '@renderer/components/core/MyAlertDialog'
 import {
   Item,
   ItemContent,
@@ -28,9 +27,6 @@ export const HomePage: React.FC = () => {
     loading,
     openDialog,
     setOpenDialog,
-    confirmDelete,
-    setConfirmDelete,
-    handleDeleteData,
     handleApprove,
     handleReject,
     handleReSendTicket,
@@ -221,14 +217,13 @@ export const HomePage: React.FC = () => {
             <h2 className="text-base font-bold text-blue-900 dark:text-white">
               Daftar Pengunjung Terbaru
             </h2>
+            <Button
+              onClick={() => setIsOpenModalConfirm(true)}
+              className="bg-blue-600 hover:bg-blue-700 w-50"
+            >
+              Buka Modal Approval
+            </Button>
           </div>
-
-          <Button
-            onClick={() => setIsOpenModalConfirm(true)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Buka Modal Approval
-          </Button>
 
           <div className="flex-1 overflow-y-auto p-5">
             <TableComponent
@@ -241,6 +236,7 @@ export const HomePage: React.FC = () => {
               handlePageChange={handlePageChange}
               handleLimitChange={handleLimitChange}
               totalPages={totalPages}
+              withPagiantion={false}
             />
 
             <ModalDetail
@@ -251,16 +247,6 @@ export const HomePage: React.FC = () => {
               onApprove={handleApprove}
               onReject={handleReject}
               handleReSendTicket={handleReSendTicket}
-            />
-
-            <MyAlertDialog
-              open={confirmDelete.open}
-              title="Konfirmasi Hapus"
-              description="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
-              confirmText="Hapus"
-              confirmColor="bg-red-600 hover:bg-red-700 text-white"
-              onConfirm={() => confirmDelete.id && handleDeleteData(confirmDelete.id)}
-              onOpenChange={(open) => setConfirmDelete({ open, id: null })}
             />
 
             <ModalConfirm

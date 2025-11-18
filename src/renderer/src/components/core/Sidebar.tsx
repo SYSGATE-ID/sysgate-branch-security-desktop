@@ -14,7 +14,7 @@ import { useTheme } from './ThemeProvider'
 
 const navItems = [
   { id: 'home', label: 'Home', icon: Home, link: '/' },
-  { id: 'dashboard', label: 'Dashboard', icon: Grid, link: '/' },
+  { id: 'dashboard', label: 'Dashboard', icon: Grid, link: '/logger' },
   { id: 'users', label: 'Users', icon: Users, link: '/' },
   { id: 'settings', label: 'Settings', icon: Settings, link: '/' }
 ]

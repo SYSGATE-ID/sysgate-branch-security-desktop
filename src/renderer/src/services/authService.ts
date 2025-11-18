@@ -7,6 +7,8 @@ import type {
 import type { IResponse } from '@interface/response.interface'
 import { useAxiosInstance } from '@renderer/api/axiosInstance'
 import { useNavigate } from 'react-router-dom'
+import { LoggerService } from './loggerService'
+import { AxiosError } from 'axios'
 
 interface AuthService {
   loginAuth: (data: IPayloadLogin) => Promise<IResponse<IResponseLogin>>
@@ -27,7 +29,13 @@ const AuthService = (): AuthService => {
       const response = await axiosInstance.post<IResponse<IResponseLogin>>(`/auth/login`, data)
       return response.data
     } catch (error) {
-      console.error(error)
+      const axiosError = error as AxiosError
+      await LoggerService.error('AuthService.loginAuth', 'Gagal login', {
+        request: '/auth/login',
+        payload: data,
+        response: axiosError.response
+      })
+      console.error(axiosError.response)
       throw error
     }
   }

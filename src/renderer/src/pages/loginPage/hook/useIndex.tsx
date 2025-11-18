@@ -6,6 +6,7 @@ import type { IErrorResponse } from '@interface/response.interface'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { UseGlobalLayout } from '@renderer/components/core/hook/useGlobalLayout'
+import { LoggerService } from '@renderer/services/loggerService'
 
 interface UseIndexReturn {
   formLogin: IPayloadLogin
@@ -40,6 +41,7 @@ export const useIndex = (): UseIndexReturn => {
       toast.error('Akses ditolak!', {
         description: `License key tidak valid! Harap hubungi SISTEMPARKIR.COM`
       })
+      await LoggerService.error('License Key Tidak valid', 'Gagal login')
       setFormLogin({ username: '', password: '' })
       setLoading({ submit: false })
       return
