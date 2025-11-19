@@ -1,3 +1,5 @@
+import { CheckCircle, Clock, FileText, Ticket, XCircle } from 'lucide-react'
+
 export const optionsStatus = [
   { value: '1', label: 'Aktif' },
   { value: '0', label: 'Tidak Aktif' }
@@ -48,3 +50,117 @@ export const optionsTime30minute = (): string[] => {
   }
   return times
 }
+
+export const toastMessage = {
+  loadError: (sub: string) => ({
+    title: `Gagal Memuat Data ${sub}`,
+    desc: 'Terjadi kesalahan saat memuat data.'
+  }),
+  createSuccess: (sub: string) => ({
+    title: 'Berhasil Menambah Data',
+    desc: `Data ${sub} berhasil ditambahkan!`
+  }),
+  createError: (sub: string) => ({
+    title: 'Gagal Menambah Data',
+    desc: `Gagal menambah data ${sub}!`
+  }),
+  updateSuccess: (sub: string) => ({
+    title: 'Berhasil Memperbarui Data',
+    desc: `Data ${sub} berhasil diperbarui!`
+  }),
+  updateError: (sub: string) => ({
+    title: 'Gagal Memperbarui Data',
+    desc: `Gagal memperbarui data ${sub}!`
+  }),
+  deleteSuccess: (sub: string) => ({
+    title: 'Berhasil Menghapus Data',
+    desc: `Data ${sub} berhasil dihapus!`
+  }),
+  deleteError: (sub: string) => ({
+    title: 'Gagal Menghapus Data',
+    desc: `Gagal menghapus data ${sub}!`
+  }),
+  validationError: () => ({
+    title: 'Validasi Error',
+    desc: 'Data yang dimasukkan tidak valid.'
+  }),
+  serverError: () => ({
+    title: 'Error',
+    desc: 'Terjadi kesalahan pada server!'
+  }),
+  idNotFound: () => ({
+    title: 'Gagal',
+    desc: 'ID tidak ditemukan!'
+  }),
+  resendSuccess: () => ({
+    title: 'Berhasil Mengirim Ulang Tiket',
+    desc: 'Tiket berhasil dikirim ulang!'
+  }),
+  resendError: () => ({
+    title: 'Gagal Mengirim Ulang Tiket',
+    desc: 'Gagal mengirim ulang tiket!'
+  })
+}
+
+export const STAT_CONFIG = {
+  created: {
+    label: 'Total',
+    icon: FileText,
+    color: 'from-blue-500 to-blue-600',
+    bgLight: 'bg-blue-50',
+    bgDark: 'dark:bg-blue-950/30',
+    textLight: 'text-blue-600',
+    textDark: 'dark:text-blue-400',
+    iconBg: 'bg-blue-100 dark:bg-blue-900/50'
+  },
+  pending: {
+    label: 'Menunggu',
+    icon: Clock,
+    color: 'from-amber-500 to-amber-600',
+    bgLight: 'bg-amber-50',
+    bgDark: 'dark:bg-amber-950/30',
+    textLight: 'text-amber-600',
+    textDark: 'dark:text-amber-400',
+    iconBg: 'bg-amber-100 dark:bg-amber-900/50'
+  },
+  approved: {
+    label: 'Disetujui',
+    icon: CheckCircle,
+    color: 'from-emerald-500 to-emerald-600',
+    bgLight: 'bg-emerald-50',
+    bgDark: 'dark:bg-emerald-950/30',
+    textLight: 'text-emerald-600',
+    textDark: 'dark:text-emerald-400',
+    iconBg: 'bg-emerald-100 dark:bg-emerald-900/50'
+  },
+  used: {
+    label: 'Sedang Digunakan',
+    icon: Ticket,
+    color: 'from-violet-500 to-violet-600',
+    bgLight: 'bg-violet-50',
+    bgDark: 'dark:bg-violet-950/30',
+    textLight: 'text-violet-600',
+    textDark: 'dark:text-violet-400',
+    iconBg: 'bg-violet-100 dark:bg-violet-900/50'
+  },
+  denied: {
+    label: 'Ditolak',
+    icon: XCircle,
+    color: 'from-rose-500 to-rose-600',
+    bgLight: 'bg-rose-50',
+    bgDark: 'dark:bg-rose-950/30',
+    textLight: 'text-rose-600',
+    textDark: 'dark:text-rose-400',
+    iconBg: 'bg-rose-100 dark:bg-rose-900/50'
+  },
+  completed: {
+    label: 'Selesai',
+    icon: CheckCircle,
+    color: 'from-cyan-500 to-cyan-600',
+    bgLight: 'bg-cyan-50',
+    bgDark: 'dark:bg-cyan-950/30',
+    textLight: 'text-cyan-600',
+    textDark: 'dark:text-cyan-400',
+    iconBg: 'bg-cyan-100 dark:bg-cyan-900/50'
+  }
+} as const

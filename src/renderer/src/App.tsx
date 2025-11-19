@@ -12,6 +12,30 @@ import { IAppRoute } from './interface/config.interface'
 // ================= TOKEN =================
 const getToken = (): string | null => localStorage.getItem('token')
 
+// ================= LOGIN ONLY LAYOUT =================
+interface LoginOnlyLayoutProps {
+  children: React.ReactNode
+}
+
+const LoginOnlyLayout = ({ children }: LoginOnlyLayoutProps): JSX.Element => {
+  const token = getToken()
+
+  if (token) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return (
+    <div className="flex flex-col w-full h-screen overflow-hidden">
+      <div className="flex-shrink-0">
+        <TitleBar />
+      </div>
+      <main className="p-0 m-0 flex-1 flex items-center justify-center bg-slate-100 dark:bg-slate-900 overflow-auto">
+        <div className="w-full h-full flex items-center justify-center p-4">{children}</div>
+      </main>
+    </div>
+  )
+}
+
 // ================= PROTECTED LAYOUT =================
 interface ProtectedLayoutProps {
   children: React.ReactNode
@@ -41,7 +65,14 @@ const SidebarLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
 
   const handleLogout = (): void => {
     localStorage.removeItem('token')
-    window.location.href = '/login'
+    localStorage.removeItem('userLogin')
+
+    // Kirim event logout ke main process
+    if (window.electron && window.electron.ipcRenderer) {
+      window.electron.ipcRenderer.send('logout')
+    } else {
+      window.location.href = '/login'
+    }
   }
 
   return (
@@ -59,43 +90,18 @@ const SidebarLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
   )
 }
 
-// ================= LOGIN LAYOUT =================
-interface LoginLayoutProps {
-  children: React.ReactNode
-}
-
-const LoginLayout = ({ children }: LoginLayoutProps): JSX.Element => (
-  <div className="flex flex-col h-screen w-screen overflow-hidden">
-    <TitleBar />
-    <main className="flex flex-1 items-center justify-center bg-slate-100 dark:bg-slate-900">
-      {children}
-    </main>
-  </div>
-)
-
-const CustomLayout = ({ children }: LoginLayoutProps): JSX.Element => (
-  <div className="flex flex-col h-screen w-screen overflow-hidden">
-    <TitleBar />
-    <main className="">{children}</main>
-  </div>
-)
-
 // ================= ROUTE WRAPPER =================
 const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
   const { element, protected: isProtected, path } = route
 
-  // PUBLIC (login)
+  // PUBLIC (login) - khusus untuk login window
   if (!isProtected && path === '/login') {
-    return <Route key={key} path={path} element={<LoginLayout>{element}</LoginLayout>} />
+    return <Route key={key} path={path} element={<LoginOnlyLayout>{element}</LoginOnlyLayout>} />
   }
 
   // PUBLIC (lainnya)
   if (!isProtected) {
-    return (
-      <>
-        <Route key={key} path={path} element={<CustomLayout>{element}</CustomLayout>} />
-      </>
-    )
+    return <Route key={key} path={path} element={element} />
   }
 
   // PROTECTED

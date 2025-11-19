@@ -10,7 +10,25 @@ const api = {
   getImage: async () => {
     return await ipcRenderer.invoke('get-assets-path')
   },
-  getImageBase64: async (filename: string) => ipcRenderer.invoke('get-image-base64', filename)
+  getImageBase64: async (filename: string) => ipcRenderer.invoke('get-image-base64', filename),
+
+  // Tambahkan IPC handlers untuk window control dan auth
+  windowControl: {
+    minimize: () => ipcRenderer.send('window-minimize'),
+    maximize: () => ipcRenderer.send('window-maximize'),
+    close: () => ipcRenderer.send('window-close')
+  },
+
+  auth: {
+    loginSuccess: () => ipcRenderer.send('login-success'),
+    logout: () => ipcRenderer.send('logout')
+  },
+
+  // Untuk listen event dari main process (jika diperlukan)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  on: (channel: string, callback: Function) => {
+    ipcRenderer.on(channel, (event, ...args) => callback(...args))
+  }
 }
 
 // Gunakan contextBridge

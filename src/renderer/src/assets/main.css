@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -117,4 +117,13 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.login-window {
+  margin: 0;
+  padding: 0;
+}
+
+.login-window * {
+  box-sizing: border-box;
 }

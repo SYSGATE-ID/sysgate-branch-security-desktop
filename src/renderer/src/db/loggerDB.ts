@@ -1,5 +1,5 @@
-import { ILogData } from '@renderer/interface/config.interface'
-import Dexie, { Table } from 'dexie'
+import type { ILogData } from '@interface/config.interface'
+import Dexie, { type Table } from 'dexie'
 
 export class LoggerDB extends Dexie {
   logs!: Table<ILogData>

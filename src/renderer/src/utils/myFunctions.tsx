@@ -3,6 +3,7 @@ import React from 'react'
 import { Badge } from '@renderer/components/ui/badge'
 import moment from 'moment/min/moment-with-locales'
 import { MD5 } from 'crypto-js'
+import { STAT_CONFIG } from './optionsData'
 
 moment.locale('id')
 
@@ -184,19 +185,28 @@ export const getEndOfCurrentMonth = (): string => moment().endOf('month').format
 export const convertStatusTicket: Record<string, { label: string; className: string }> = {
   PENDING: {
     label: 'MENUNGGU',
-    className: 'bg-yellow-500 hover:bg-yellow-600 text-neutral-50'
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200'
   },
   ACTIVE: {
     label: 'DISETUJUI',
-    className: 'bg-green-500 hover:bg-green-600 text-neutral-50'
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'
   },
   USED: {
     label: 'DIGUNAKAN',
-    className: 'bg-blue-500 hover:bg-blue-600 text-neutral-50'
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200'
   },
   DENIED: {
     label: 'DITOLAK',
-    className: 'bg-red-500 hover:bg-red-600 text-neutral-50'
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200'
+  },
+  COMPLETE: {
+    label: 'SELESAI',
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 border border-cyan-200'
   }
 }
 
@@ -223,4 +233,14 @@ export const recursiveMD5 = (text: string, rounds: number): string => {
   } else {
     return recursiveMD5(MD5(text).toString(), rounds - 1)
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
+export const generateStats = (statistic?: any) => {
+  if (!statistic) return []
+
+  return Object.entries(STAT_CONFIG).map(([key, config]) => ({
+    ...config,
+    value: statistic.ticket?.[key] ?? statistic.stats?.[key] ?? 0
+  }))
 }

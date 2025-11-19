@@ -20,15 +20,11 @@ export const HomePage: React.FC = () => {
     table,
     totalRows,
     pagination,
-    handlePageChange,
-    handleLimitChange,
     totalPages,
     selectedData,
     loading,
     openDialog,
     setOpenDialog,
-    handleApprove,
-    handleReject,
     handleReSendTicket,
     statistic,
     stats,
@@ -186,17 +182,31 @@ export const HomePage: React.FC = () => {
           </div>
 
           {statistic ? (
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stats.map((item, index) => {
-                // const Icon = stat.icon
+            <div className="grid grid-cols-1 p-5 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stats.map((stat, index) => {
+                const Icon = stat.icon
                 return (
-                  <div key={index} className={`${item.bgLight} ${item.bgDark} rounded-lg p-4`}>
-                    <div
-                      className={`${item.textLight} ${item.textDark} text-3xl font-semibold mb-1`}
-                    >
-                      {item.value}
+                  <div
+                    key={index}
+                    className={`${stat.bgLight} ${stat.bgDark} rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700/50 hover:-translate-y-1`}
+                  >
+                    {/* Baris utama: label, angka, icon */}
+                    <div className="flex items-center justify-between w-full">
+                      {/* Label dan angka */}
+                      <div>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+                          {stat.label}
+                        </p>
+                        <p className={`text-2xl font-bold ${stat.textLight} ${stat.textDark}`}>
+                          {stat.value.toLocaleString()}
+                        </p>
+                      </div>
+
+                      {/* Icon di kanan */}
+                      <div className={`${stat.iconBg} p-3 rounded-xl`}>
+                        <Icon className={`w-6 h-6 ${stat.textLight} ${stat.textDark}`} />
+                      </div>
                     </div>
-                    <div className={`text-sm text-gray-600 dark:text-gray-400`}>{item.label}</div>
                   </div>
                 )
               })}
@@ -205,7 +215,9 @@ export const HomePage: React.FC = () => {
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
-                <p className="text-slate-600 dark:text-slate-400 font-medium"></p>
+                <p className="text-slate-600 dark:text-slate-400 font-medium">
+                  Memuat statistik dashboard...
+                </p>
               </div>
             </div>
           )}
@@ -233,8 +245,8 @@ export const HomePage: React.FC = () => {
               columns={columns}
               totalRows={totalRows}
               pagination={pagination}
-              handlePageChange={handlePageChange}
-              handleLimitChange={handleLimitChange}
+              handlePageChange={() => null}
+              handleLimitChange={() => null}
               totalPages={totalPages}
               withPagiantion={false}
             />
@@ -244,14 +256,14 @@ export const HomePage: React.FC = () => {
               selectedData={selectedData}
               openDialog={openDialog}
               setOpenDialog={setOpenDialog}
-              onApprove={handleApprove}
-              onReject={handleReject}
+              onApprove={() => null}
+              onReject={() => null}
               handleReSendTicket={handleReSendTicket}
             />
 
             <ModalConfirm
-              handleApprove={handleApprove}
-              handleReject={handleReject}
+              handleApprove={() => null}
+              handleReject={() => null}
               isOpenModalConfirm={isOpenModalConfirm}
               setIsOpenModalConfirm={setIsOpenModalConfirm}
             />

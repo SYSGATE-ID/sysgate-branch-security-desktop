@@ -1,3 +1,4 @@
+import { useAxiosInstance } from '@api/axiosInstance'
 import type {
   IPayloadLogin,
   IResponseLogin,
@@ -5,10 +6,9 @@ import type {
   IResponseTokenValidation
 } from '@interface/auth.interface'
 import type { IResponse } from '@interface/response.interface'
-import { useAxiosInstance } from '@renderer/api/axiosInstance'
+import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { LoggerService } from './loggerService'
-import { AxiosError } from 'axios'
 
 interface AuthService {
   loginAuth: (data: IPayloadLogin) => Promise<IResponse<IResponseLogin>>
@@ -35,7 +35,7 @@ const AuthService = (): AuthService => {
         payload: data,
         response: axiosError.response
       })
-      console.error(axiosError.response)
+      console.error(error)
       throw error
     }
   }
@@ -68,10 +68,10 @@ const AuthService = (): AuthService => {
     }
   }
 
-  const logout = (): void => {
-    // ✅ Hapus localStorage
+  const logout = async (): Promise<void> => {
     localStorage.removeItem('userLogin')
     navigate('/cmsadmin/login')
+    await LoggerService.info('Logout Berhasil', 'user melakukan logout')
   }
 
   return {

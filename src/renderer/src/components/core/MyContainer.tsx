@@ -10,7 +10,7 @@ export const MyContainer: React.FC<MyContainerProps> = ({ children, className })
   return (
     <div
       className={clsx(
-        'bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 rounded-lg shadow transition-colors duration-300',
+        'bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 rounded-lg shadow p-6 transition-colors duration-300',
         className
       )}
     >

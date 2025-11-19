@@ -1,4 +1,6 @@
+import type { IReportStats } from './config.interface'
 import type { IMedia } from './media.interface'
+import type { IMeta } from './response.interface'
 import type { ITariff } from './tariff.interface'
 
 export interface IVisitor {
@@ -33,7 +35,26 @@ export interface IPayloadVisitor {
   picture_filenames: string[]
   tariff_code: string
   reservation_at: string
+  time_reservation?: string
 }
 export interface IPayloadAgreement {
   judge_reason: string
+}
+export interface IResponseReportVisitor<T = unknown> {
+  message: string
+  status_code: number
+  success: boolean
+  error: string
+  data?: T
+  meta?: IMeta
+  filters: IReportFilter
+  stats: IReportStats
+}
+
+export interface IReportFilter {
+  filters: string
+  status: string
+  date_from: string
+  date_to: string
+  vehicle_plate: string
 }

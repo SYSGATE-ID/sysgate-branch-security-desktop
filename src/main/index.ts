@@ -5,9 +5,67 @@ import icon from '../../resources/icon.png?asset'
 import { readFileSync } from 'fs'
 import nodeChildProcess from 'child_process'
 
-function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
+let mainWindow: BrowserWindow | null = null
+let loginWindow: BrowserWindow | null = null
+
+function createLoginWindow(): void {
+  // Jika login window sudah ada, focus dan return
+  if (loginWindow) {
+    loginWindow.focus()
+    return
+  }
+
+  // Create login window
+  loginWindow = new BrowserWindow({
+    width: 450,
+    height: 600,
+    minWidth: 450,
+    minHeight: 600,
+    show: false,
+    frame: false,
+    titleBarStyle: 'hidden',
+    resizable: false,
+    center: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      nodeIntegration: true,
+      webSecurity: false,
+      contextIsolation: false
+    }
+  })
+
+  loginWindow.on('ready-to-show', () => {
+    loginWindow?.show()
+    loginWindow?.focus()
+  })
+
+  loginWindow.on('closed', () => {
+    loginWindow = null
+    // Jika login window ditutup dan main window belum ada, tutup app
+    if (!mainWindow) {
+      app.quit()
+    }
+  })
+
+  // HMR for renderer base on electron-vite cli.
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/login')
+  } else {
+    loginWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+      hash: '/login'
+    })
+  }
+}
+
+function createMainWindow(): void {
+  // Jika main window sudah ada, focus dan return
+  if (mainWindow) {
+    mainWindow.focus()
+    return
+  }
+
+  // Create the main browser window.
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 1200,
@@ -19,31 +77,22 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      // sandbox: false,
       nodeIntegration: true,
       webSecurity: false
     }
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow?.show()
+    mainWindow?.focus()
   })
 
-  ipcMain.on('window-minimize', () => {
-    mainWindow.minimize()
-  })
-
-  ipcMain.on('window-maximize', () => {
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize()
-    } else {
-      mainWindow.maximize()
+  mainWindow.on('closed', () => {
+    mainWindow = null
+    // Jika main window ditutup, buka login window
+    if (!loginWindow) {
+      createLoginWindow()
     }
-  })
-
-  ipcMain.on('window-close', () => {
-    mainWindow.close()
-    mainWindow.webContents.executeJavaScript(`localStorage.clear();`).catch(() => {})
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -52,7 +101,6 @@ function createWindow(): void {
   })
 
   // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -60,6 +108,43 @@ function createWindow(): void {
   }
 }
 
+// IPC handlers untuk semua window
+ipcMain.on('window-minimize', (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  window?.minimize()
+})
+
+ipcMain.on('window-maximize', (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (window?.isMaximized()) {
+    window.unmaximize()
+  } else {
+    window?.maximize()
+  }
+})
+
+ipcMain.on('window-close', (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  window?.close()
+})
+
+// Handler untuk login berhasil
+ipcMain.on('login-success', () => {
+  // Tutup login window dan buka main window
+  loginWindow?.close()
+  loginWindow = null
+  createMainWindow()
+})
+
+// Handler untuk logout
+ipcMain.on('logout', () => {
+  // Tutup main window dan buka login window
+  mainWindow?.close()
+  mainWindow = null
+  createLoginWindow()
+})
+
+// IPC handlers lainnya (get-my-config, get-assets-path, get-deviceID) tetap sama
 ipcMain.handle('get-my-config', async () => {
   try {
     const jsonPath = is.dev
@@ -74,7 +159,6 @@ ipcMain.handle('get-my-config', async () => {
   }
 })
 
-// Dapatkan path folder image
 ipcMain.handle('get-assets-path', async () => {
   const assetsPathConfig = is.dev
     ? join(__dirname, '../../resources/assets')
@@ -83,16 +167,25 @@ ipcMain.handle('get-assets-path', async () => {
   return assetsPathConfig
 })
 
+ipcMain.on('get-deviceID', (event) => {
+  const script = nodeChildProcess.spawn('cmd.exe', ['/c', 'wmic csproduct get uuid'])
+
+  script.stdout.on('data', (data) => {
+    event.sender.send('uuid-response', data.toString().trim())
+  })
+
+  script.stderr.on('data', (err) => {
+    event.sender.send('uuid-response', `Error: ${err.toString().trim()}`)
+  })
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
   // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -100,25 +193,13 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  // GET UUID DEVICE
-  ipcMain.on('get-deviceID', (event) => {
-    const script = nodeChildProcess.spawn('cmd.exe', ['/c', 'wmic csproduct get uuid'])
-
-    script.stdout.on('data', (data) => {
-      event.sender.send('uuid-response', data.toString().trim())
-    })
-
-    script.stderr.on('data', (err) => {
-      event.sender.send('uuid-response', `Error: ${err.toString().trim()}`)
-    })
-  })
-
-  createWindow()
+  // Buat login window pertama kali
+  createLoginWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createLoginWindow()
   })
 })
 
@@ -127,6 +208,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

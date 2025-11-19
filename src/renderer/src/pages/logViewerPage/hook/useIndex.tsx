@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { loggerDB } from '@renderer/db/loggerDB'
-import { ILogData } from '@renderer/interface/config.interface'
 import { useNavigate } from 'react-router-dom'
+import type { ILogData } from '@interface/config.interface'
+import { loggerDB } from '@renderer/db/loggerDB'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
@@ -11,8 +11,6 @@ export const useIndex = () => {
 
   const loadLogs = async (): Promise<void> => {
     const data = await loggerDB.logs.orderBy('created_at').reverse().toArray()
-    console.log(data)
-
     setLogs(data)
   }
 
@@ -29,13 +27,36 @@ export const useIndex = () => {
     if (!search) return true
 
     const s = search.toLowerCase()
-    return (
+
+    // Cek field utama
+    const mainFieldsMatch =
       log.type?.toLowerCase().includes(s) ||
       log.action?.toLowerCase().includes(s) ||
-      log.message?.toLowerCase().includes(s) ||
-      JSON.stringify(log.meta || '')
-        .toLowerCase()
-        .includes(s) ||
+      log.message?.toLowerCase().includes(s)
+
+    if (mainFieldsMatch) return true
+
+    // Cek dalam meta (client information)
+    if (log.meta && typeof log.meta === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const meta = log.meta as any
+      if (meta.client) {
+        const client = meta.client
+        const clientMatch =
+          client.ip?.toLowerCase().includes(s) ||
+          client.device?.browser?.toLowerCase().includes(s) ||
+          client.device?.os?.toLowerCase().includes(s) ||
+          client.device?.deviceType?.toLowerCase().includes(s) ||
+          client.device?.platform?.toLowerCase().includes(s) ||
+          client.url?.toLowerCase().includes(s) ||
+          client.hostname?.toLowerCase().includes(s)
+
+        if (clientMatch) return true
+      }
+    }
+
+    // Cek field lainnya
+    return (
       JSON.stringify(log.request || '')
         .toLowerCase()
         .includes(s) ||
@@ -43,6 +64,9 @@ export const useIndex = () => {
         .toLowerCase()
         .includes(s) ||
       JSON.stringify(log.response || '')
+        .toLowerCase()
+        .includes(s) ||
+      JSON.stringify(log.meta || '')
         .toLowerCase()
         .includes(s)
     )

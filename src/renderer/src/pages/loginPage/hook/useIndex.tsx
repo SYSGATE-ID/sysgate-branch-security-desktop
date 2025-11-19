@@ -1,5 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom'
 import AuthService from '@services/authService'
 import type { IPayloadLogin } from '@interface/auth.interface'
 import type { IErrorResponse } from '@interface/response.interface'
@@ -17,7 +17,7 @@ interface UseIndexReturn {
 }
 
 export const useIndex = (): UseIndexReturn => {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const authService = AuthService()
   const { licenseIs } = UseGlobalLayout()
   const [formLogin, setFormLogin] = useState<IPayloadLogin>({
@@ -71,7 +71,12 @@ export const useIndex = (): UseIndexReturn => {
         toast.success('Login Berhasil', {
           description: `Selamat datang ${response.data!.user.username}`
         })
-        navigate('/')
+        if (window.api && window.api.auth) {
+          window.api.auth.loginSuccess()
+        } else {
+          // Fallback untuk development (browser)
+          window.location.href = '/'
+        }
       } else {
         toast.error('Login Gagal', {
           description: 'Username/Password yang Anda masukkan salah!'
