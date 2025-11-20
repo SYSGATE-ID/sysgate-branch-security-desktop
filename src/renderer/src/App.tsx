@@ -8,6 +8,7 @@ import { useConfigStore } from './store/configProvider'
 import { useTheme } from './components/core/ThemeProvider'
 import { appRoutes } from './routes/appRoutes'
 import { IAppRoute } from './interface/config.interface'
+import { LoginTitleBar } from './components/core/LoginTitleBar'
 
 // ================= TOKEN =================
 const getToken = (): string | null => localStorage.getItem('token')
@@ -27,10 +28,10 @@ const LoginOnlyLayout = ({ children }: LoginOnlyLayoutProps): JSX.Element => {
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
       <div className="flex-shrink-0">
-        <TitleBar />
+        <LoginTitleBar />
       </div>
       <main className="p-0 m-0 flex-1 flex items-center justify-center bg-slate-100 dark:bg-slate-900 overflow-auto">
-        <div className="w-full h-full flex items-center justify-center p-4">{children}</div>
+        <div className="w-full h-full flex items-center justify-center">{children}</div>
       </main>
     </div>
   )
@@ -121,6 +122,10 @@ const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
 // ================= APP =================
 const App: React.FC = () => {
   const { fetchConfig, isLoading } = useConfigStore()
+
+  // window.addEventListener('beforeunload', () => {
+  //   localStorage.clear()
+  // })
 
   useEffect(() => {
     fetchConfig()

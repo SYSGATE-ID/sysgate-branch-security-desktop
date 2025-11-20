@@ -18,9 +18,9 @@ function createLoginWindow(): void {
   // Create login window
   loginWindow = new BrowserWindow({
     width: 450,
-    height: 600,
+    height: 550,
     minWidth: 450,
-    minHeight: 600,
+    minHeight: 550,
     show: false,
     frame: false,
     titleBarStyle: 'hidden',
@@ -125,6 +125,7 @@ ipcMain.on('window-maximize', (event) => {
 
 ipcMain.on('window-close', (event) => {
   const window = BrowserWindow.fromWebContents(event.sender)
+  window?.webContents.executeJavaScript('localStorage.clear()')
   window?.close()
 })
 
@@ -179,6 +180,13 @@ ipcMain.on('get-deviceID', (event) => {
   })
 })
 
+ipcMain.handle('clear-localstorage', async () => {
+  const windows = BrowserWindow.getAllWindows()
+  windows.forEach((win) => {
+    win.webContents.executeJavaScript('localStorage.clear()')
+  })
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(() => {
@@ -200,6 +208,13 @@ app.whenReady().then(() => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createLoginWindow()
+  })
+})
+
+app.on('before-quit', () => {
+  const windows = BrowserWindow.getAllWindows()
+  windows.forEach((win) => {
+    win.webContents.executeJavaScript('localStorage.clear()')
   })
 })
 

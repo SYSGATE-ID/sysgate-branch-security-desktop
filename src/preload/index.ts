@@ -27,7 +27,7 @@ const api = {
   // Untuk listen event dari main process (jika diperlukan)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   on: (channel: string, callback: Function) => {
-    ipcRenderer.on(channel, (event, ...args) => callback(...args))
+    ipcRenderer.on(channel, (_, ...args) => callback(...args))
   }
 }
 
