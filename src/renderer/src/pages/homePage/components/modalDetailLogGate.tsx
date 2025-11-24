@@ -1,0 +1,100 @@
+import React from 'react'
+import { Dialog, DialogContent } from '@renderer/components/ui/dialog'
+import { ILogGate } from '@renderer/interface/gate.interface'
+import {
+  convertStatusLogGate,
+  formatDateTime,
+  getNoPlatLogGate,
+  getPictureLogGate,
+  getTariffLogGate,
+  getUserTypeLogGate
+} from '@renderer/utils/myFunctions'
+import { Button } from '@renderer/components/ui/button'
+import { Badge } from '@renderer/components/ui/badge'
+import { ChevronRight, Ticket, User } from 'lucide-react'
+
+interface ModalProps {
+  data: ILogGate | null
+  loading: { actionPermission: boolean }
+  openDialog: boolean
+  setOpenDialog: (val: boolean) => void
+}
+
+export const ModalDetailLogGate: React.FC<ModalProps> = ({ openDialog, setOpenDialog, data }) => {
+  return (
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      <DialogContent className="min-w-[900px] rounded-2xl p-0 overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 transition-colors">
+        {data ? (
+          <>
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 text-white flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold mb-1">
+                  {getTariffLogGate(data)} - {getNoPlatLogGate(data)}
+                </h2>
+                <p className="text-blue-100 fw-medium text-sm flex items-center gap-4">
+                  {formatDateTime(data.created_at.toString()) || ''}
+                  <ChevronRight size={12} />
+                  <span className="flex items-center gap-2">
+                    {getUserTypeLogGate(data) === 'member' ? (
+                      <>
+                        <User className="h-4 w-4 text-white" />
+                        <span className="text-sm">Member</span>
+                      </>
+                    ) : getUserTypeLogGate(data) === 'ticket' ? (
+                      <>
+                        <Ticket className="h-4 w-4 text-white" />
+                        <span className="text-sm">Umum</span>
+                      </>
+                    ) : (
+                      <span className="text-sm text-gray-500">Unknown</span>
+                    )}
+                  </span>
+                  <ChevronRight size={12} />
+                  <Badge className={`${convertStatusLogGate[data.action].className}`}>
+                    {convertStatusLogGate[data.action].label}
+                  </Badge>
+                </p>
+              </div>
+            </div>
+            {/* Body */}
+            <div className="max-h-[70vh] overflow-y-auto p-6 space-y-4 pt-0 dark:bg-neutral-900">
+              <h1 className="mb-4 text-[16px] text-sm font-semibold mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                Foto Masuk
+              </h1>
+              <img
+                src={getPictureLogGate(data, 1)}
+                alt={convertStatusLogGate[data.action].label}
+                width="100%"
+                height="300px"
+                className="object-cover grayscale"
+              />
+              <h1 className="mb-4 text-[16px] font-semibold mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                Foto Keluar
+              </h1>
+              {getPictureLogGate(data, 0) !== '' && (
+                <img
+                  src={getPictureLogGate(data, 0)}
+                  alt={convertStatusLogGate[data.action].label}
+                  width="100%"
+                  height="300px"
+                  className="object-cover grayscale"
+                />
+              )}
+            </div>
+            <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-6 py-4 flex justify-end">
+              <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                Tutup
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="p-6 text-center text-slate-500 dark:text-slate-400 italic">
+            Tidak ada data pengunjung.
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}

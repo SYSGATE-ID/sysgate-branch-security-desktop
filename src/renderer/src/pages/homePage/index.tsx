@@ -2,7 +2,6 @@ import { MyContainer } from '@renderer/components/core/MyContainer'
 import React from 'react'
 import { useIndex } from './hook/useIndex'
 import { TableComponent } from '@renderer/components/core/tableData'
-import { ModalDetail } from './components/modalDetail'
 import {
   Item,
   ItemContent,
@@ -12,6 +11,18 @@ import {
 } from '@renderer/components/ui/item'
 import { Button } from '@renderer/components/ui/button'
 import { ModalConfirm } from './components/modalConfirm'
+import {
+  convertStatusLogGate,
+  formatDateTime,
+  getNoPlatLogGate,
+  getPictureLogGate,
+  getTariffLogGate,
+  getUserTypeLogGate
+} from '@renderer/utils/myFunctions'
+import { Badge } from '@renderer/components/ui/badge'
+import { Ticket, User } from 'lucide-react'
+import { ModalDetailVisitor } from './components/modalDetailVisitor'
+import { ModalDetailLogGate } from './components/modalDetailLogGate'
 
 export const HomePage: React.FC = () => {
   const {
@@ -24,88 +35,14 @@ export const HomePage: React.FC = () => {
     selectedData,
     loading,
     openDialog,
-    setOpenDialog,
-    handleReSendTicket,
+    closeDialogHandler,
     statistic,
     stats,
-    isOpenModalConfirm,
-    setIsOpenModalConfirm
+    handleGetDetailLogGate,
+    logGates,
+    openDialogHandler,
+    selectedlogGate
   } = useIndex()
-
-  const dataLog = [
-    {
-      name: 'Mini Bus',
-      tipe: 'Member',
-      plat: '',
-      gate: 'IN',
-      time: '10:30'
-    },
-
-    {
-      name: 'Truk',
-      tipe: 'Umum',
-      plat: 'B4432DGA',
-      gate: 'OUT',
-      time: '10:25'
-    },
-    {
-      name: 'Mini Bus',
-      tipe: 'Umum',
-      plat: 'B1342GFD',
-      gate: 'IN',
-      time: '10:20'
-    },
-    {
-      name: 'Mini Bus',
-      tipe: 'Member',
-      plat: '',
-      gate: 'IN',
-      time: '10:30'
-    },
-    {
-      name: 'Mini Bus',
-      tipe: 'Member',
-      plat: '',
-      gate: 'IN',
-      time: '10:30'
-    },
-
-    {
-      name: 'Truk',
-      tipe: 'Umum',
-      plat: 'B4432DGA',
-      gate: 'OUT',
-      time: '10:25'
-    },
-    {
-      name: 'Mini Bus',
-      tipe: 'Umum',
-      plat: 'B1342GFD',
-      gate: 'IN',
-      time: '10:20'
-    },
-    {
-      name: 'Mini Bus',
-      tipe: 'Member',
-      plat: '',
-      gate: 'IN',
-      time: '10:30'
-    },
-    {
-      name: 'Truk',
-      tipe: 'Umum',
-      plat: 'B4432DGA',
-      gate: 'OUT',
-      time: '10:25'
-    },
-    {
-      name: 'Mini Bus',
-      tipe: 'Umum',
-      plat: 'B1342GFD',
-      gate: 'IN',
-      time: '10:20'
-    }
-  ]
 
   return (
     <div className="flex gap-5 h-[89vh]">
@@ -122,50 +59,71 @@ export const HomePage: React.FC = () => {
           {/* Activity List */}
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-3">
-              {dataLog.map((item, index) => (
-                <Item key={index} variant="outline" asChild role="listitem">
-                  <a href="#">
-                    <ItemMedia variant="image">
-                      <img
-                        src={`https://avatar.vercel.sh/${item.name}`}
-                        alt={item.name}
-                        width={32}
-                        height={32}
-                        className="object-cover grayscale"
-                      />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle className="line-clamp-1">
-                        {item.name}{' '}
-                        {item.plat && <span className="text-muted-foreground">- {item.plat}</span>}
-                      </ItemTitle>
-                      <ItemDescription>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                            {item.tipe}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {item.time}
-                          </span>
-                        </div>
-                      </ItemDescription>
-                    </ItemContent>
-                    <ItemContent className="flex-none text-center">
-                      <ItemDescription>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            item.gate === 'IN'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                          }`}
-                        >
-                          {item.gate}
-                        </span>
-                      </ItemDescription>
-                    </ItemContent>
-                  </a>
-                </Item>
-              ))}
+              {!loading.fetchLogGate ? (
+                logGates.length > 0 ? (
+                  logGates.map((item, index) => (
+                    <Item
+                      key={index}
+                      onClick={() => handleGetDetailLogGate(item.id)}
+                      variant="outline"
+                      asChild
+                      role="listitem"
+                    >
+                      <a href="#">
+                        <ItemMedia variant="image">
+                          <img
+                            src={`${convertStatusLogGate[item.action].label === 'IN' ? getPictureLogGate(item, 1) : getPictureLogGate(item, 0)}`}
+                            alt={convertStatusLogGate[item.action].label}
+                            width={32}
+                            height={32}
+                            className="object-cover grayscale"
+                          />
+                        </ItemMedia>
+                        <ItemContent>
+                          <ItemTitle className="line-clamp-1">
+                            <span className="text-muted-foreground">
+                              {getTariffLogGate(item)} - {getNoPlatLogGate(item)}
+                            </span>
+                          </ItemTitle>
+                          <ItemDescription>
+                            <div className="flex items-center gap-2">
+                              {getUserTypeLogGate(item) === 'member' ? (
+                                <>
+                                  <User className="h-4 w-4 text-blue-500" />
+                                  <span className="text-sm">Member</span>
+                                </>
+                              ) : getUserTypeLogGate(item) === 'ticket' ? (
+                                <>
+                                  <Ticket className="h-4 w-4 text-green-500" />
+                                  <span className="text-sm">Umum</span>
+                                </>
+                              ) : (
+                                <span className="text-sm text-gray-500">Unknown</span>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatDateTime(item.created_at.toString())}
+                            </span>
+                          </ItemDescription>
+                        </ItemContent>
+                        <Badge className={`${convertStatusLogGate[item.action].className}`}>
+                          {convertStatusLogGate[item.action].label}
+                        </Badge>
+                      </a>
+                    </Item>
+                  ))
+                ) : (
+                  <div className="h-100 flex justify-center items-center">
+                    <h2 className="text-center font-medium">Data masih kosong</h2>
+                  </div>
+                )
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </MyContainer>
@@ -230,7 +188,7 @@ export const HomePage: React.FC = () => {
               Daftar Pengunjung Terbaru
             </h2>
             <Button
-              onClick={() => setIsOpenModalConfirm(true)}
+              onClick={() => openDialogHandler('confirmData')}
               className="bg-blue-600 hover:bg-blue-700 w-50"
             >
               Buka Modal Approval
@@ -251,21 +209,25 @@ export const HomePage: React.FC = () => {
               withPagiantion={false}
             />
 
-            <ModalDetail
+            <ModalDetailVisitor
               loading={loading}
               selectedData={selectedData}
-              openDialog={openDialog}
-              setOpenDialog={setOpenDialog}
-              onApprove={() => null}
-              onReject={() => null}
-              handleReSendTicket={handleReSendTicket}
+              openDialog={openDialog === 'detailVisitor'}
+              setOpenDialog={closeDialogHandler}
+            />
+
+            <ModalDetailLogGate
+              data={selectedlogGate || null}
+              loading={loading}
+              openDialog={openDialog === 'detailLogGate'}
+              setOpenDialog={closeDialogHandler}
             />
 
             <ModalConfirm
               handleApprove={() => null}
               handleReject={() => null}
-              isOpenModalConfirm={isOpenModalConfirm}
-              setIsOpenModalConfirm={setIsOpenModalConfirm}
+              openDialog={openDialog === 'confirmData'}
+              setOpenDialog={closeDialogHandler}
             />
           </div>
         </MyContainer>

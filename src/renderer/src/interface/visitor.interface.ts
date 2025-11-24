@@ -24,6 +24,8 @@ export interface IVisitor {
   delete_by: string
   tariff_id: number
   tariff: ITariff
+  picture_out: string
+  picture_in: string
 }
 
 export interface IPayloadVisitor {

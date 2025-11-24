@@ -1,4 +1,5 @@
 import type { IMedia } from './media.interface'
+import { ITariff } from './tariff.interface'
 
 export interface IMember {
   id: number
@@ -17,6 +18,9 @@ export interface IMember {
   update_by: string
   delete_by: string
   status: string
+  picture_out: string
+  picture_in: string
+  tariff: ITariff
 }
 
 export interface IPayloadMember {

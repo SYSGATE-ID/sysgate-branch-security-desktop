@@ -10,12 +10,13 @@ interface ModalProps {
   loading: { actionPermission: boolean }
   openDialog: boolean
   setOpenDialog: (val: boolean) => void
-  onApprove?: (id: string, reason: string) => void
-  onReject?: (id: string, reason: string) => void
-  handleReSendTicket: (data: IVisitor, tipe: string) => void
 }
 
-export const ModalDetail: React.FC<ModalProps> = ({ selectedData, openDialog, setOpenDialog }) => {
+export const ModalDetailVisitor: React.FC<ModalProps> = ({
+  selectedData,
+  openDialog,
+  setOpenDialog
+}) => {
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent className="max-w-3xl rounded-2xl p-0 overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 transition-colors">

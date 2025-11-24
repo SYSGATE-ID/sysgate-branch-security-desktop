@@ -1,12 +1,14 @@
 import { useAxiosInstance } from '@api/axiosInstance'
 import type { IResponse } from '@interface/response.interface'
-import type { IGate, IPayloadGate } from '@interface/gate.interface'
+import type { IGate, ILogGate, IPayloadGate } from '@interface/gate.interface'
 import type { AxiosError, AxiosResponse } from 'axios'
 import { LoggerService } from './loggerService'
 
 interface GateService {
   getAllGate: (params?: object) => Promise<IResponse<IGate[]>>
+  getAllLogGate: (params?: object) => Promise<IResponse<ILogGate[]>>
   getDetailGate: (id: string) => Promise<IResponse<IGate>>
+  getDetailLogGate: (id: string) => Promise<IResponse<ILogGate>>
   createGate: (data: IPayloadGate) => Promise<IResponse>
   updateGate: (id: string, data: IPayloadGate) => Promise<IResponse>
   deleteGate: (id: number) => Promise<IResponse>
@@ -34,6 +36,18 @@ const GateService = (): GateService => {
     }
   }
 
+  const getAllLogGate = async (params?: object): Promise<IResponse<ILogGate[]>> => {
+    try {
+      const response: AxiosResponse<IResponse<ILogGate[]>> = await axiosInstance.get(`/gate/logs`, {
+        params
+      })
+      return response.data
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
   const getDetailGate = async (id: string): Promise<IResponse<IGate>> => {
     try {
       const response: AxiosResponse<IResponse<IGate>> = await axiosInstance.get(`/gate/${id}`)
@@ -44,6 +58,18 @@ const GateService = (): GateService => {
         request: `/gate/${id}`,
         response: axiosError.response
       })
+      console.error(error)
+      throw error
+    }
+  }
+
+  const getDetailLogGate = async (id: string): Promise<IResponse<ILogGate>> => {
+    try {
+      const response: AxiosResponse<IResponse<ILogGate>> = await axiosInstance.get(
+        `/gate/log/${id}`
+      )
+      return response.data
+    } catch (error) {
       console.error(error)
       throw error
     }
@@ -139,8 +165,10 @@ const GateService = (): GateService => {
 
   return {
     getAllGate,
+    getAllLogGate,
     getTypeGate,
     getDetailGate,
+    getDetailLogGate,
     createGate,
     updateGate,
     deleteGate

@@ -17,18 +17,23 @@ import { toast } from 'sonner'
 import { useSSEInstance } from '@renderer/api/useSSEInstance'
 import { Badge } from '@renderer/components/ui/badge'
 import VisitorService from '@renderer/services/visitorService'
+import GateService from '@renderer/services/gateService'
+import { toastMessage } from '@renderer/utils/optionsData'
+import { ILogGate } from '@renderer/interface/gate.interface'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
   const visitorService = VisitorService()
+  const gateService = GateService()
   const [statistic, setStatistic] = useState<IDashboardData | null>(null)
-  const [isOpenModalConfirm, setIsOpenModalConfirm] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
 
   const initialPage = 1
   const initialLimit = 50
 
   const [data, setData] = useState<IVisitor[]>([])
+  const [logGates, setLogGates] = useState<ILogGate[]>([])
+  const [selectedlogGate, setSelectedLogGate] = useState<ILogGate | null>(null)
   const [totalRows, setTotalRows] = useState(0)
 
   const [pagination] = useState<IPagination>({
@@ -40,12 +45,14 @@ export const useIndex = () => {
 
   const [loading, setLoading] = useState({
     fetchData: false,
+    fetchLogGate: false,
+    fetchDetailLogGate: false,
     deleteData: false,
     actionPermission: false
   })
 
   const [selectedData, setSelectedData] = useState<IVisitor | null>(null)
-  const [openDialog, setOpenDialog] = useState(false)
+  const [openDialog, setOpenDialog] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{
     open: boolean
     id: number | null
@@ -53,6 +60,50 @@ export const useIndex = () => {
     open: false,
     id: null
   })
+
+  const openDialogHandler = (dialogName: string): void => {
+    setOpenDialog(dialogName)
+  }
+
+  // Fungsi untuk menutup dialog
+  const closeDialogHandler = (): void => {
+    setOpenDialog(null)
+  }
+
+  const handleGetDetailLogGate = async (id: number): Promise<void> => {
+    await fetchDetailLog(id)
+    openDialogHandler('detailLogGate')
+  }
+
+  useEffect(() => {
+    const fetchLogGate = async (): Promise<void> => {
+      try {
+        setLoading((p) => ({ ...p, fetchLogGate: true }))
+        const params = {
+          page: pagination.page,
+          limit: pagination.limit,
+          search: ''
+        }
+
+        const response = await gateService.getAllLogGate(params)
+
+        if (response.status_code === 200) {
+          setLogGates(response.data || [])
+          setTotalRows(response.meta?.total || 0)
+        }
+      } catch (error) {
+        const axiosError = error as AxiosError<IErrorResponse>
+        const { title, desc } = toastMessage.loadError('log gate')
+        const message = axiosError.response?.data?.message || desc
+        toast.error(title, {
+          description: message
+        })
+      } finally {
+        setLoading((p) => ({ ...p, fetchLogGate: false }))
+      }
+    }
+    fetchLogGate()
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -87,6 +138,26 @@ export const useIndex = () => {
 
     return () => eventSource.close()
   }, [])
+
+  const fetchDetailLog = async (id: number): Promise<void> => {
+    try {
+      setLoading({ ...loading, fetchDetailLogGate: true })
+      const response = await gateService.getDetailLogGate(id.toString())
+
+      if (response.status_code === 200) {
+        setSelectedLogGate(response.data || null)
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      const { title, desc } = toastMessage.loadError('detail log')
+      const message = axiosError.response?.data?.message || desc
+      toast.error(title, {
+        description: message
+      })
+    } finally {
+      setLoading({ ...loading, fetchDetailLogGate: false })
+    }
+  }
 
   const columns: ColumnDef<IVisitor>[] = [
     {
@@ -144,7 +215,7 @@ export const useIndex = () => {
         <button
           onClick={async () => {
             await fetchDetailData(row.original.id)
-            setOpenDialog(true)
+            openDialogHandler('detailVisitor')
           }}
           className="text-blue-600 font-medium hover:underline transition-colors"
         >
@@ -279,7 +350,11 @@ Terima kasih.
     setConfirmDelete,
     totalPages,
     handleReSendTicket,
-    isOpenModalConfirm,
-    setIsOpenModalConfirm
+    logGates,
+    fetchDetailLog,
+    selectedlogGate,
+    openDialogHandler,
+    closeDialogHandler,
+    handleGetDetailLogGate
   }
 }

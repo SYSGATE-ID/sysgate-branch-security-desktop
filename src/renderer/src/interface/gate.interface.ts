@@ -1,3 +1,6 @@
+import { IMember } from './member.interface'
+import { IVisitor } from './visitor.interface'
+
 export interface IGate {
   id: number
   name: string
@@ -14,4 +17,16 @@ export interface IPayloadGate {
   name: string
   description?: string
   type: string
+}
+
+export interface ILogGate {
+  id: number
+  gate_id: number
+  action: string
+  created_at: Date
+  member_id: number
+  ticket_id: number
+  gate: IGate
+  member: IMember
+  ticket: IVisitor | null
 }

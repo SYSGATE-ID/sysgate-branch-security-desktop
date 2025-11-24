@@ -110,6 +110,24 @@ export const useAxiosInstance = (): AxiosInstance => {
       const method = error.config?.method?.toUpperCase()
       const pageInfo = getCurrentPageInfo()
 
+      if (status === 401) {
+        LoggerService.warn('AxiosInstance.Auth', 'Unauthorized access - redirecting to login', {
+          reason: 'Token expired or invalid',
+          actions: 'Clearing storage and redirecting',
+          meta: {
+            page: pageInfo,
+            previousPage: location.pathname
+          }
+        })
+        localStorage.clear()
+        toast.warning('Akses Ditolak', {
+          description: `Harap login terlebih dahulu.`
+        })
+        localStorage.clear()
+        window.electron?.ipcRenderer.send('window-close')
+        return Promise.reject(error) // Return rejected promise untuk menghentikan chain
+      }
+
       // Skip logging untuk GET errors (kecuali error penting)
       if (method === 'GET') {
         // Hanya log GET errors untuk status error tertentu
@@ -175,6 +193,8 @@ export const useAxiosInstance = (): AxiosInstance => {
 
       // Handle different error statuses
       if (status === 401) {
+        console.log('asdasd')
+
         LoggerService.warn('AxiosInstance.Auth', 'Unauthorized access - redirecting to login', {
           reason: 'Token expired or invalid',
           actions: 'Clearing storage and redirecting',

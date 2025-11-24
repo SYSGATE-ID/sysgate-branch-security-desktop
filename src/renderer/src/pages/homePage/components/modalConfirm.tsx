@@ -6,15 +6,15 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area'
 import { CheckCircle2, X, XCircle } from 'lucide-react'
 
 interface ModalConfirmProps {
-  isOpenModalConfirm: boolean
-  setIsOpenModalConfirm: (open: boolean) => void
+  openDialog: boolean
+  setOpenDialog: (open: boolean) => void
   handleReject: (id: string) => void
   handleApprove: (id: string) => void
 }
 
 export const ModalConfirm: React.FC<ModalConfirmProps> = ({
-  isOpenModalConfirm,
-  setIsOpenModalConfirm,
+  openDialog,
+  setOpenDialog,
   handleReject,
   handleApprove
 }) => {
@@ -30,10 +30,10 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   }
 
   return (
-    <Dialog open={isOpenModalConfirm} onOpenChange={setIsOpenModalConfirm}>
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent className="min-w-full h-[95vh] p-0 rounded-2xl shadow-2xl">
         <Button
-          onClick={() => setIsOpenModalConfirm(false)}
+          onClick={() => setOpenDialog(false)}
           className="
     absolute top-2 right-2 z-99 
     bg-slate-700 hover:bg-slate-800 

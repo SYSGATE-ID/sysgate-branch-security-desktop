@@ -4,6 +4,7 @@ import { Badge } from '@renderer/components/ui/badge'
 import moment from 'moment/min/moment-with-locales'
 import { MD5 } from 'crypto-js'
 import { STAT_CONFIG } from './optionsData'
+import { ILogGate } from '@renderer/interface/gate.interface'
 
 moment.locale('id')
 
@@ -243,4 +244,60 @@ export const generateStats = (statistic?: any) => {
     ...config,
     value: statistic.ticket?.[key] ?? statistic.stats?.[key] ?? 0
   }))
+}
+
+export const getUserTypeLogGate = (log: ILogGate): string => {
+  if (log.member_id) return 'member'
+  if (log.ticket_id) return 'ticket'
+  return 'unknown'
+}
+
+export const getTariffLogGate = (log: ILogGate): string => {
+  if (log.member_id) {
+    return log.member?.tariff.code || ''
+  }
+  if (log.ticket_id) {
+    return log.ticket?.tariff.code || ''
+  }
+  return ''
+}
+
+export const getNoPlatLogGate = (log: ILogGate): string => {
+  if (log.member_id) {
+    // return log.member?.tariff.code || ""
+    return 'blm'
+  }
+  if (log.ticket_id) {
+    return log.ticket?.vehicle_plate || ''
+  }
+  return ''
+}
+
+export const getPictureLogGate = (log: ILogGate, type: number = 1): string => {
+  if (log.member_id) {
+    if (type === 1) {
+      return log.member?.picture_in || ''
+    }
+    return log.member?.picture_out || ''
+  }
+  if (log.ticket_id) {
+    if (type === 1) {
+      return log.ticket?.picture_in || ''
+    }
+    return log.ticket?.picture_out || ''
+  }
+  return ''
+}
+
+export const convertStatusLogGate: Record<string, { label: string; className: string }> = {
+  ENTER: {
+    label: 'IN',
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200'
+  },
+  EXIT: {
+    label: 'OUT',
+    className:
+      'px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200'
+  }
 }
