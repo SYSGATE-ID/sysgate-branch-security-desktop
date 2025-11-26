@@ -5,20 +5,20 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   type TableOptions,
-  type SortingState,
-} from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+  type SortingState
+} from '@tanstack/react-table'
+import { useEffect, useState } from 'react'
 
 interface UseTableInstanceProps<TData> {
-  data: TData[];
-  columns: TableOptions<TData>["columns"];
-  totalRows: number;
-  pagination: {
-    page: number;
-    limit: number;
-  };
-  sorting: SortingState;
-  setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
+  data: TData[]
+  columns: TableOptions<TData>['columns']
+  totalRows: number
+  pagination?: {
+    page: number
+    limit: number
+  }
+  sorting: SortingState
+  setSorting: React.Dispatch<React.SetStateAction<SortingState>>
 }
 
 export const useTableInstance = <TData>({
@@ -27,19 +27,18 @@ export const useTableInstance = <TData>({
   totalRows,
   pagination,
   sorting,
-  setSorting,
+  setSorting
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 }: UseTableInstanceProps<TData>) => {
   // optional: simpan ukuran kolom di localStorage
-  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(
-    () => {
-      const saved = localStorage.getItem("tableSizing");
-      return saved ? JSON.parse(saved) : {};
-    }
-  );
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('tableSizing')
+    return saved ? JSON.parse(saved) : {}
+  })
 
   useEffect(() => {
-    localStorage.setItem("tableSizing", JSON.stringify(columnSizing));
-  }, [columnSizing]);
+    localStorage.setItem('tableSizing', JSON.stringify(columnSizing))
+  }, [columnSizing])
 
   const table = useReactTable({
     data,
@@ -48,20 +47,20 @@ export const useTableInstance = <TData>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    columnResizeMode: "onChange",
+    columnResizeMode: 'onChange',
     enableColumnResizing: true,
     manualPagination: true,
     rowCount: totalRows,
     state: {
       sorting,
       pagination: {
-        pageIndex: pagination.page - 1,
-        pageSize: pagination.limit,
+        pageIndex: (pagination && pagination.page - 1) || 1,
+        pageSize: (pagination && pagination.limit) || 1
       },
-      columnSizing,
+      columnSizing
     },
-    onColumnSizingChange: setColumnSizing,
-  });
+    onColumnSizingChange: setColumnSizing
+  })
 
-  return table;
-};
+  return table
+}

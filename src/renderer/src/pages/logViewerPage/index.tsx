@@ -99,9 +99,9 @@ export const LogViewerPage: React.FC = () => {
   }
 
   return (
-    <MyContainer>
+    <MyContainer className="p-6">
       {/* ============================ HEADER ============================ */}
-      <CardHeader className="p-0 mb-6 flex flex-row justify-between items-center gap-4">
+      <CardHeader className="mb-6 flex flex-row justify-between items-center gap-4">
         <div>
           <CardTitle className="text-2xl font-bold mb-2">Logger Aktivitas</CardTitle>
           <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -175,7 +175,7 @@ export const LogViewerPage: React.FC = () => {
         </div>
 
         {/* ============================ LIST LOGS ============================ */}
-        <div className="space-y-3 pr-2 max-h-[calc(100vh-250px)] overflow-y-auto">
+        <div className="space-y-3 pr-2 max-h-[calc(100vh-280px)] overflow-y-auto">
           {filteredLogs.length === 0 && (
             <div className="text-center text-gray-500 py-10 text-sm">
               {logs.length === 0

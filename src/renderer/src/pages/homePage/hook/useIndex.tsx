@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowUpDown } from 'lucide-react'
-import type { IDashboardData, IPagination, IResponseDashboard } from '@interface/config.interface'
+import type {
+  IDashboardData,
+  IResponseDashboard,
+  IWebSocketData
+} from '@interface/config.interface'
 import { ColumnDef, SortingState } from '@tanstack/react-table'
 import { IVisitor } from '@renderer/interface/visitor.interface'
 import { useTableInstance } from '@renderer/components/core/useTableDataInstance'
@@ -19,37 +23,38 @@ import { Badge } from '@renderer/components/ui/badge'
 import VisitorService from '@renderer/services/visitorService'
 import GateService from '@renderer/services/gateService'
 import { toastMessage } from '@renderer/utils/optionsData'
-import { ILogGate } from '@renderer/interface/gate.interface'
+import { ILogGate, IPayloadWSChecking } from '@renderer/interface/gate.interface'
+import { useConfigStore } from '@renderer/store/configProvider'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
+  const userLogin = localStorage.getItem('userLogin')
+  const userData = userLogin ? JSON.parse(userLogin) : null
+
+  const { config } = useConfigStore.getState()
+  const ws_url = config?.ws_url || ''
+
   const visitorService = VisitorService()
   const gateService = GateService()
   const [statistic, setStatistic] = useState<IDashboardData | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-
-  const initialPage = 1
-  const initialLimit = 50
-
   const [data, setData] = useState<IVisitor[]>([])
   const [logGates, setLogGates] = useState<ILogGate[]>([])
   const [selectedlogGate, setSelectedLogGate] = useState<ILogGate | null>(null)
+  const [dataFromWS, setDataFromWS] = useState<IPayloadWSChecking>()
   const [totalRows, setTotalRows] = useState(0)
-
-  const [pagination] = useState<IPagination>({
-    page: initialPage,
-    limit: initialLimit
-  })
-
-  const totalPages = Math.ceil(totalRows / pagination.limit) || 1
 
   const [loading, setLoading] = useState({
     fetchData: false,
     fetchLogGate: false,
     fetchDetailLogGate: false,
     deleteData: false,
-    actionPermission: false
+    actionPermission: false,
+    wsAction: false
   })
+
+  const [wsData, setWsData] = useState<IWebSocketData | null>(null)
+  const ws = useRef<WebSocket | null>(null)
 
   const [selectedData, setSelectedData] = useState<IVisitor | null>(null)
   const [openDialog, setOpenDialog] = useState<string | null>(null)
@@ -65,9 +70,9 @@ export const useIndex = () => {
     setOpenDialog(dialogName)
   }
 
-  // Fungsi untuk menutup dialog
   const closeDialogHandler = (): void => {
     setOpenDialog(null)
+    setWsData(null)
   }
 
   const handleGetDetailLogGate = async (id: number): Promise<void> => {
@@ -80,8 +85,8 @@ export const useIndex = () => {
       try {
         setLoading((p) => ({ ...p, fetchLogGate: true }))
         const params = {
-          page: pagination.page,
-          limit: pagination.limit,
+          page: 1,
+          limit: 20,
           search: ''
         }
 
@@ -262,7 +267,6 @@ export const useIndex = () => {
     data,
     columns,
     totalRows,
-    pagination,
     sorting,
     setSorting
   })
@@ -333,12 +337,153 @@ Terima kasih.
 
   const stats = generateStats(statistic)
 
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const connectWebSocket = () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        console.error('Token tidak ditemukan')
+        return
+      }
+
+      const wsUrl = `${ws_url}/gatekeeper?role=KEEPER&client_id=${token}`
+
+      try {
+        ws.current = new WebSocket(wsUrl)
+
+        ws.current.onopen = () => {
+          console.log('WebSocket connected')
+          toast.success('WebSocket Connected', {
+            description: 'Terhubung ke server gatekeeper'
+          })
+        }
+
+        ws.current.onmessage = (event) => {
+          try {
+            const data: IWebSocketData = JSON.parse(event.data)
+            setDataFromWS(data.payload)
+
+            // Handle different message types
+            switch (data.type) {
+              case 'WRONG_PLATE_NEED_APPROVAL':
+                setWsData(data)
+                openDialogHandler('confirmData')
+                toast.info('Perlu Approval', {
+                  description: 'Ada kendaraan yang perlu persetujuan'
+                })
+                break
+
+              case 'OTHER_MESSAGE_TYPE':
+                // Handle other message types
+                break
+
+              default:
+                console.log('Unknown message type:', data.type)
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error)
+          }
+        }
+
+        ws.current.onerror = (error) => {
+          console.error('WebSocket error:', error)
+          toast.error('WebSocket Error', {
+            description: 'Terjadi kesalahan pada koneksi'
+          })
+        }
+
+        ws.current.onclose = (event) => {
+          console.log('WebSocket disconnected:', event.code, event.reason)
+          if (event.code !== 1000) {
+            // Reconnect setelah 5 detik jika bukan close normal
+            setTimeout(connectWebSocket, 5000)
+          }
+        }
+      } catch (error) {
+        console.error('Error creating WebSocket:', error)
+      }
+    }
+
+    connectWebSocket()
+
+    // Cleanup function
+    return () => {
+      if (ws.current) {
+        ws.current.close(1000, 'Component unmounting')
+      }
+    }
+  }, [])
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const sendWsResponse = (action: 'APPROVE_TICKET' | 'DENY_TICKET', reason?: string) => {
+    if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+      toast.error('WebSocket tidak terhubung')
+      return
+    }
+
+    if (!wsData) {
+      toast.error('Data tidak ditemukan')
+      return
+    }
+
+    setLoading((prev) => ({ ...prev, wsAction: true }))
+
+    const response = {
+      type: action,
+      payload: {
+        ticket_id: dataFromWS?.ticket.id || dataFromWS?.member.id,
+        gate_name: dataFromWS?.gate.name,
+        reason: reason || ''
+      },
+      meta: {
+        timestamp: new Date().toISOString(),
+        responded_by: 'gatekeeper',
+        client_id: localStorage.getItem('token')
+      }
+    }
+
+    try {
+      ws.current.send(JSON.stringify(response))
+      toast.success(`Berhasil ${action === 'APPROVE_TICKET' ? 'Menyetujui' : 'Menolak'}`, {
+        description: `Permintaan telah dikirim`
+      })
+      closeDialogHandler()
+    } catch (error) {
+      console.error('Error sending WebSocket response:', error)
+      toast.error('Gagal Mengirim Response')
+    } finally {
+      setLoading((prev) => ({ ...prev, wsAction: false }))
+    }
+  }
+
+  const handleActionConfirm = (type: 'APPROVE' | 'REJECT'): void => {
+    if (type === 'APPROVE') {
+      sendWsResponse('APPROVE_TICKET')
+    } else {
+      const reason = `Ditolak oleh operator ${userData.username}`
+      sendWsResponse('DENY_TICKET', reason)
+    }
+  }
+
+  // for testing
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'j') {
+        e.preventDefault()
+        openDialogHandler('confirmData')
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   return {
     statistic,
     stats,
     data,
     totalRows,
-    pagination,
     loading,
     columns,
     table,
@@ -348,13 +493,15 @@ Terima kasih.
     setOpenDialog,
     confirmDelete,
     setConfirmDelete,
-    totalPages,
     handleReSendTicket,
     logGates,
     fetchDetailLog,
     selectedlogGate,
     openDialogHandler,
     closeDialogHandler,
-    handleGetDetailLogGate
+    handleGetDetailLogGate,
+    handleActionConfirm,
+    isWsConnected: ws.current?.readyState === WebSocket.OPEN,
+    dataFromWS
   }
 }

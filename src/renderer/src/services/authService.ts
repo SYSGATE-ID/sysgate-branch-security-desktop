@@ -6,7 +6,6 @@ import type {
   IResponseTokenValidation
 } from '@interface/auth.interface'
 import type { IResponse } from '@interface/response.interface'
-import type { AxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { LoggerService } from './loggerService'
 
@@ -29,12 +28,6 @@ const AuthService = (): AuthService => {
       const response = await axiosInstance.post<IResponse<IResponseLogin>>(`/auth/login`, data)
       return response.data
     } catch (error) {
-      const axiosError = error as AxiosError
-      await LoggerService.error('AuthService.loginAuth', 'Gagal login', {
-        request: '/auth/login',
-        payload: data,
-        response: axiosError.response
-      })
       console.error(error)
       throw error
     }

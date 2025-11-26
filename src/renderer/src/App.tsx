@@ -90,6 +90,25 @@ const SidebarLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
     </div>
   )
 }
+const SidebarLogLayout = ({ children }: SidebarLayoutProps): JSX.Element => {
+  const { theme, setTheme } = useTheme()
+
+  const userLogin = localStorage.getItem('userLogin')
+  const userData = userLogin ? JSON.parse(userLogin) : null
+
+  return (
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
+      <TitleBar
+        username={userData?.username}
+        onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      />
+
+      <div className="flex flex-1 overflow-hidden">
+        <main className="flex-1 bg-slate-100 dark:bg-black p-6 overflow-y-auto">{children}</main>
+      </div>
+    </div>
+  )
+}
 
 // ================= ROUTE WRAPPER =================
 const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
@@ -102,7 +121,7 @@ const renderRoute = (route: IAppRoute, key: number): JSX.Element => {
 
   // PUBLIC (lainnya)
   if (!isProtected) {
-    return <Route key={key} path={path} element={element} />
+    return <Route key={key} path={path} element={<SidebarLogLayout>{element}</SidebarLogLayout>} />
   }
 
   // PROTECTED

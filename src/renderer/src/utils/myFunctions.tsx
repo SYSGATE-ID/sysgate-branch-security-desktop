@@ -264,8 +264,7 @@ export const getTariffLogGate = (log: ILogGate): string => {
 
 export const getNoPlatLogGate = (log: ILogGate): string => {
   if (log.member_id) {
-    // return log.member?.tariff.code || ""
-    return 'blm'
+    return log.member?.tariff.code || ''
   }
   if (log.ticket_id) {
     return log.ticket?.vehicle_plate || ''

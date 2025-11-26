@@ -30,3 +30,10 @@ export interface ILogGate {
   member: IMember
   ticket: IVisitor | null
 }
+
+export interface IPayloadWSChecking {
+  gate: IGate
+  image: string
+  ticket: IVisitor
+  member: IMember
+}

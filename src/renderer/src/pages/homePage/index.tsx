@@ -9,7 +9,6 @@ import {
   ItemMedia,
   ItemTitle
 } from '@renderer/components/ui/item'
-import { Button } from '@renderer/components/ui/button'
 import { ModalConfirm } from './components/modalConfirm'
 import {
   convertStatusLogGate,
@@ -30,8 +29,6 @@ export const HomePage: React.FC = () => {
     data,
     table,
     totalRows,
-    pagination,
-    totalPages,
     selectedData,
     loading,
     openDialog,
@@ -40,8 +37,9 @@ export const HomePage: React.FC = () => {
     stats,
     handleGetDetailLogGate,
     logGates,
-    openDialogHandler,
-    selectedlogGate
+    selectedlogGate,
+    handleActionConfirm,
+    dataFromWS
   } = useIndex()
 
   return (
@@ -187,12 +185,6 @@ export const HomePage: React.FC = () => {
             <h2 className="text-base font-bold text-blue-900 dark:text-white">
               Daftar Pengunjung Terbaru
             </h2>
-            <Button
-              onClick={() => openDialogHandler('confirmData')}
-              className="bg-blue-600 hover:bg-blue-700 w-50"
-            >
-              Buka Modal Approval
-            </Button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-5">
@@ -202,10 +194,10 @@ export const HomePage: React.FC = () => {
               data={data}
               columns={columns}
               totalRows={totalRows}
-              pagination={pagination}
+              // pagination={null}
               handlePageChange={() => null}
               handleLimitChange={() => null}
-              totalPages={totalPages}
+              // totalPages={totalPages}
               withPagiantion={false}
             />
 
@@ -224,10 +216,11 @@ export const HomePage: React.FC = () => {
             />
 
             <ModalConfirm
-              handleApprove={() => null}
-              handleReject={() => null}
+              handleActionConfirm={handleActionConfirm}
               openDialog={openDialog === 'confirmData'}
               setOpenDialog={closeDialogHandler}
+              data={dataFromWS}
+              loading={loading.wsAction}
             />
           </div>
         </MyContainer>

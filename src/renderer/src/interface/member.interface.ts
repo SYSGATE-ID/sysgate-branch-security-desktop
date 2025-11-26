@@ -31,4 +31,5 @@ export interface IPayloadMember {
   email: string
   phone: string
   description: string
+  vehicle_plate?: string
 }

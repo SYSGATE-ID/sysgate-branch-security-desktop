@@ -39,7 +39,7 @@ export const useIndex = (): UseIndexReturn => {
 
     if (!licenseIs) {
       toast.error('Akses ditolak!', {
-        description: `License key tidak valid! Harap hubungi SISTEMPARKIR.COM`
+        description: `License key tidak valid! Harap hubungi kami`
       })
       await LoggerService.error('License Key Tidak valid', 'Gagal login')
       setFormLogin({ username: '', password: '' })

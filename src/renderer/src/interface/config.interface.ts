@@ -77,3 +77,11 @@ export interface IAppRoute {
   protected: boolean
   redirectTo?: string
 }
+
+export interface IWebSocketData {
+  type: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  meta: any
+}

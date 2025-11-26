@@ -1,5 +1,6 @@
 export interface IConfigAsset {
   api_url: string
+  ws_url: string
   url_background: string
   api_secretcode: string
   license: string

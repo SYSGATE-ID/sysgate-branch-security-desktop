@@ -25,10 +25,10 @@ interface TableComponentProps<IData> {
   columns: ColumnDef<IData>[]
   loading: { fetchData: boolean }
   totalRows: number
-  pagination: IPagination
+  pagination?: IPagination
   handlePageChange: (newPage: number) => void
   handleLimitChange: (newLimit: number) => void
-  totalPages: number
+  totalPages?: number
   withPagiantion?: boolean
 }
 
@@ -130,7 +130,7 @@ export function TableComponent<TData>({
       </div>
 
       {/* Pagination */}
-      {withPagiantion && (
+      {withPagiantion && totalPages && pagination && totalPages && (
         <div className="flex items-center justify-between py-4 text-sm">
           <div className="flex items-center gap-2">
             <span>Total per page:</span>

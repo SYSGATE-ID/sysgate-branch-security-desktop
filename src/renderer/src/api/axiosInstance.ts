@@ -103,8 +103,6 @@ export const useAxiosInstance = (): AxiosInstance => {
       return response
     },
     (error) => {
-      console.log('jahha', error.response.status)
-
       const status = error.response?.status
       const url = error.config?.url
       const method = error.config?.method?.toUpperCase()
@@ -124,7 +122,7 @@ export const useAxiosInstance = (): AxiosInstance => {
           description: `Harap login terlebih dahulu.`
         })
         localStorage.clear()
-        window.electron?.ipcRenderer.send('window-close')
+        // window.electron?.ipcRenderer.send('window-close')
         return Promise.reject(error) // Return rejected promise untuk menghentikan chain
       }
 
@@ -193,8 +191,6 @@ export const useAxiosInstance = (): AxiosInstance => {
 
       // Handle different error statuses
       if (status === 401) {
-        console.log('asdasd')
-
         LoggerService.warn('AxiosInstance.Auth', 'Unauthorized access - redirecting to login', {
           reason: 'Token expired or invalid',
           actions: 'Clearing storage and redirecting',

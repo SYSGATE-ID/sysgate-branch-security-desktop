@@ -29,14 +29,12 @@ export const UseGlobalLayout = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500))
 
-      secLicense = getDigitMD5Serial(recursiveMD5('2021VMS2025' + secProductId, 10))
-      console.log(secLicense)
-
+      secLicense = getDigitMD5Serial(recursiveMD5('25SYSGATEE#PT' + secProductId + 'ELECTRONN', 10))
       if (secLicense === myLicense) {
         setLicenseIs(true)
         console.log('license valid')
       } else {
-        console.log('license invalid')
+        console.error('license invalid')
       }
     } catch (error) {
       console.error(`Error License ${error}`)
