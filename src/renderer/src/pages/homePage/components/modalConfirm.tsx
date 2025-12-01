@@ -9,7 +9,7 @@ import { IPayloadWSChecking } from '@renderer/interface/gate.interface'
 interface ModalConfirmProps {
   openDialog: boolean
   setOpenDialog: (open: boolean) => void
-  handleActionConfirm: (type: 'APPROVE' | 'REJECT') => void
+  handleActionConfirm: (type: 'APPROVE' | 'REJECT', data: IPayloadWSChecking) => void
   data?: IPayloadWSChecking
   loading?: boolean
 }
@@ -48,7 +48,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                 Verifikasi Kendaraan Keluar
                 <div className="flex gap-4">
                   <Button
-                    onClick={() => handleActionConfirm('REJECT')}
+                    onClick={() => handleActionConfirm('REJECT', data)}
                     disabled={loading || !data}
                     size="lg"
                     className="h-10 w-60 bg-red-600 hover:bg-red-700 text-white font-semibold font-[22px] rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -63,7 +63,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                     )}
                   </Button>
                   <Button
-                    onClick={() => handleActionConfirm('APPROVE')}
+                    onClick={() => handleActionConfirm('APPROVE', data)}
                     disabled={loading || !data}
                     size="lg"
                     className="h-10 w-100 bg-green-600 hover:bg-green-700 text-white font-semibold font-[22px] rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"

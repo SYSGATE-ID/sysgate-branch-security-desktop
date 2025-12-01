@@ -25,6 +25,7 @@ import GateService from '@renderer/services/gateService'
 import { toastMessage } from '@renderer/utils/optionsData'
 import { ILogGate, IPayloadWSChecking } from '@renderer/interface/gate.interface'
 import { useConfigStore } from '@renderer/store/configProvider'
+import { WsResponseAction } from '@renderer/interface/ws.interface'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
@@ -365,7 +366,14 @@ Terima kasih.
 
             // Handle different message types
             switch (data.type) {
-              case 'WRONG_PLATE_NEED_APPROVAL':
+              case 'MEMBER_WITH_WRONG_PLATE_NEED_APPROVAL':
+                setWsData(data)
+                openDialogHandler('confirmData')
+                toast.info('Perlu Approval', {
+                  description: 'Ada kendaraan yang perlu persetujuan'
+                })
+                break
+              case 'TICKET_WITH_WRONG_PLATE_NEED_APPROVAL':
                 setWsData(data)
                 openDialogHandler('confirmData')
                 toast.info('Perlu Approval', {
@@ -415,7 +423,7 @@ Terima kasih.
   }, [])
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const sendWsResponse = (action: 'APPROVE_TICKET' | 'DENY_TICKET', reason?: string) => {
+  const sendWsResponse = (action: WsResponseAction, reason?: string) => {
     if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
       toast.error('WebSocket tidak terhubung')
       return
@@ -444,9 +452,12 @@ Terima kasih.
 
     try {
       ws.current.send(JSON.stringify(response))
-      toast.success(`Berhasil ${action === 'APPROVE_TICKET' ? 'Menyetujui' : 'Menolak'}`, {
-        description: `Permintaan telah dikirim`
-      })
+      toast.success(
+        `Berhasil ${action === WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_MEMBER || action === WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_TICKET ? 'Menyetujui' : 'Menolak'}`,
+        {
+          description: `Permintaan telah dikirim`
+        }
+      )
       closeDialogHandler()
     } catch (error) {
       console.error('Error sending WebSocket response:', error)
@@ -456,12 +467,18 @@ Terima kasih.
     }
   }
 
-  const handleActionConfirm = (type: 'APPROVE' | 'REJECT'): void => {
+  const handleActionConfirm = (type: 'APPROVE' | 'REJECT', data: IPayloadWSChecking): void => {
     if (type === 'APPROVE') {
-      sendWsResponse('APPROVE_TICKET')
+      if (data.member) {
+        return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_MEMBER)
+      }
+      return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_TICKET)
     } else {
       const reason = `Ditolak oleh operator ${userData.username}`
-      sendWsResponse('DENY_TICKET', reason)
+      if (data.member) {
+        return sendWsResponse(WsResponseAction.KEEPER_DENY_ACCESS_WITH_WRONG_PLATE_MEMBER, reason)
+      }
+      return sendWsResponse(WsResponseAction.KEEPER_DENY_ACCESS_WITH_WRONG_PLATE_TICKET, reason)
     }
   }
 
