@@ -18,8 +18,8 @@ export interface IMember {
   update_by: string
   delete_by: string
   status: string
-  picture_out: string
-  picture_in: string
+  picture_out: IMedia
+  picture_in: IMedia
   tariff: ITariff
 }
 

@@ -9,7 +9,7 @@ export const useAxiosInstance = (): AxiosInstance => {
   const navigate = useNavigate()
   const location = useLocation()
   const { config } = useConfigStore.getState() // langsung akses tanpa hook
-  const baseURL = config?.api_url || 'http://localhost/sysgate-branch'
+  const baseURL = config?.api_url || 'http://localhost/3003'
   const token = localStorage.getItem('token')
 
   const instance = axios.create({
@@ -103,6 +103,8 @@ export const useAxiosInstance = (): AxiosInstance => {
       return response
     },
     (error) => {
+      console.log('jahha', error.response.status)
+
       const status = error.response?.status
       const url = error.config?.url
       const method = error.config?.method?.toUpperCase()
@@ -122,7 +124,7 @@ export const useAxiosInstance = (): AxiosInstance => {
           description: `Harap login terlebih dahulu.`
         })
         localStorage.clear()
-        // window.electron?.ipcRenderer.send('window-close')
+        window.electron?.ipcRenderer.send('window-close')
         return Promise.reject(error) // Return rejected promise untuk menghentikan chain
       }
 
@@ -191,6 +193,8 @@ export const useAxiosInstance = (): AxiosInstance => {
 
       // Handle different error statuses
       if (status === 401) {
+        console.log('asdasd')
+
         LoggerService.warn('AxiosInstance.Auth', 'Unauthorized access - redirecting to login', {
           reason: 'Token expired or invalid',
           actions: 'Clearing storage and redirecting',

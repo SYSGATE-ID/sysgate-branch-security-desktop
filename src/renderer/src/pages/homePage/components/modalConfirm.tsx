@@ -5,6 +5,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { ScrollArea } from '@renderer/components/ui/scroll-area'
 import { CheckCircle2, X, XCircle } from 'lucide-react'
 import { IPayloadWSChecking } from '@renderer/interface/gate.interface'
+import { useConfigStore } from '@renderer/store/configProvider'
 
 interface ModalConfirmProps {
   openDialog: boolean
@@ -21,6 +22,12 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   handleActionConfirm,
   loading = false
 }) => {
+  const { assetsPathConfig } = useConfigStore()
+
+  const defaultImage = `${assetsPathConfig}\\images\\no_img.jpg`
+
+  const pictureIn = data && (data?.ticket?.picture_in?.image_url || data?.image || defaultImage)
+  const pictureOut = data && (data?.ticket?.picture_out?.image_url || defaultImage)
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent className="min-w-full h-[95vh] p-0 rounded-2xl shadow-2xl">
@@ -92,29 +99,24 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
               </div>
             )} */}
 
-                {/* Photos side-by-side on top */}
                 <div className="grid grid-cols-2 gap-5 mb-1">
                   {/* Foto Masuk */}
-                  {data?.ticket.picture_in && (
-                    <div className="relative aspect-video bg-slate-100 ps-3">
-                      <img
-                        src={data?.ticket.picture_in.image_url || ''}
-                        alt="Foto Masuk Kendaraan"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                  <div className="relative aspect-video ps-3">
+                    <img
+                      src={pictureIn}
+                      alt="Foto Masuk Kendaraan"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
                   {/* Foto Keluar */}
-                  {data?.ticket.picture_out && (
-                    <div className="relative aspect-video bg-slate-100 pe-3">
-                      <img
-                        src={data?.ticket.picture_out.image_url || ''}
-                        alt="Foto Keluar Kendaraan"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                  <div className="relative aspect-video pe-3">
+                    <img
+                      src={pictureOut}
+                      alt="Foto Keluar Kendaraan"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
 
                 <div className="p-5 pt-0">
