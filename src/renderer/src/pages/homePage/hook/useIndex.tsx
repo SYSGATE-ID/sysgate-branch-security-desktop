@@ -436,13 +436,26 @@ Terima kasih.
 
     setLoading((prev) => ({ ...prev, wsAction: true }))
 
+    const hasTicket = Boolean(dataFromWS?.ticket?.id)
+    const hasMember = Boolean(dataFromWS?.member?.id)
+
+    const ticketId = dataFromWS?.ticket?.id
+    const memberId = dataFromWS?.member?.number
+
+    const payload = {
+      gate_name: dataFromWS?.gate?.name,
+      reason: reason || ''
+    }
+
+    if (hasTicket) {
+      payload.ticket_id = ticketId
+    } else if (hasMember) {
+      payload.member_number = memberId
+    }
+
     const response = {
       type: action,
-      payload: {
-        ticket_id: dataFromWS?.ticket.id || dataFromWS?.member.id,
-        gate_name: dataFromWS?.gate.name,
-        reason: reason || ''
-      },
+      payload,
       meta: {
         timestamp: new Date().toISOString(),
         responded_by: 'gatekeeper',
@@ -468,6 +481,9 @@ Terima kasih.
   }
 
   const handleActionConfirm = (type: 'APPROVE' | 'REJECT', data: IPayloadWSChecking): void => {
+    console.log(type)
+    console.log(data)
+
     if (type === 'APPROVE') {
       if (data.member) {
         return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_MEMBER)

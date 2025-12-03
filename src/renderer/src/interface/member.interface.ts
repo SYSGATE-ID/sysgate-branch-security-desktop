@@ -18,6 +18,7 @@ export interface IMember {
   update_by: string
   delete_by: string
   status: string
+  vehicle_plate: string
   picture_out: IMedia
   picture_in: IMedia
   tariff: ITariff
