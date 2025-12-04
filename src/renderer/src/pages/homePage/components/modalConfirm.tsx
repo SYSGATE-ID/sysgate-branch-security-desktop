@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/comp
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { ScrollArea } from '@renderer/components/ui/scroll-area'
-import { CheckCircle2, X, XCircle } from 'lucide-react'
+import { CheckCircle2, Ticket, User, X, XCircle } from 'lucide-react'
 import { IPayloadWSChecking } from '@renderer/interface/gate.interface'
 import { useConfigStore } from '@renderer/store/configProvider'
 
@@ -27,7 +27,23 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   const defaultImage = `${assetsPathConfig}\\images\\no_img.jpg`
 
   const pictureIn = data && (data?.ticket?.picture_in?.image_url || data?.image || defaultImage)
+
   const pictureOut = data && (data?.ticket?.picture_out?.image_url || defaultImage)
+
+  const nama =
+    (data && data?.member && data.member.full_name) || (data?.ticket && data.ticket.full_name)
+
+  const noPlat =
+    (data && data?.member && data.member.vehicle_plate) ||
+    (data?.ticket && data.ticket.vehicle_plate)
+
+  const tipe =
+    (data && data?.member && <span className="text-blue-500">Member</span>) ||
+    (data?.ticket && 'Umum')
+  const tipeIcon =
+    (data && data?.member && <User className="h-4 w-4 mt-1 me-3 text-blue-500" />) ||
+    (data?.ticket && <Ticket className="h-4 w-4 mt-1 me-3 text-green-500" />)
+
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent className="min-w-full h-[95vh] p-0 rounded-2xl shadow-2xl">
@@ -126,15 +142,12 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                       <div className="grid grid-cols-2 my-3 mb-4 gap-6">
                         <div>
                           <p className="text-sm text-slate-500 font-medium">Nama Lengkap</p>
-                          <p className="text-black font-bold">
-                            {data?.ticket && data?.ticket.full_name}
-                          </p>
+                          <p className="text-black font-bold">{nama}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-slate-500 font-medium">Nomor Kendaraan</p>
+                          <p className="text-sm text-slate-500 font-medium">No. Plat Terdaftar</p>
                           <p className="text-black font-bold font-mono bg-slate-100 px-3 py-1.5 rounded-lg inline-block">
-                            {(data?.ticket && data?.ticket.vehicle_plate) ||
-                              (data?.member && data?.member.vehicle_plate)}
+                            {noPlat}
                           </p>
                         </div>
                       </div>
@@ -144,12 +157,15 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                       <div className="grid grid-cols-2 my-3 mb-4 gap-6">
                         <div>
                           <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
-                            Tanggal
+                            Tipe
                           </p>
-                          <p className="text-black font-bold">belum</p>
+                          <p className="text-black font-bold flex">
+                            {tipeIcon}
+                            {tipe}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-sm text-slate-500 font-medium">Keperluan</p>
+                          <p className="text-sm text-slate-500 font-medium">No. Plat Terdeteksi</p>
                           <p className="text-black font-bold">belum</p>
                         </div>
                       </div>

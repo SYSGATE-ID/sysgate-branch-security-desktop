@@ -442,7 +442,7 @@ Terima kasih.
     const ticketId = dataFromWS?.ticket?.id
     const memberId = dataFromWS?.member?.number
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       gate_name: dataFromWS?.gate?.name,
       reason: reason || ''
     }
@@ -481,9 +481,6 @@ Terima kasih.
   }
 
   const handleActionConfirm = (type: 'APPROVE' | 'REJECT', data: IPayloadWSChecking): void => {
-    console.log(type)
-    console.log(data)
-
     if (type === 'APPROVE') {
       if (data.member) {
         return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_MEMBER)
