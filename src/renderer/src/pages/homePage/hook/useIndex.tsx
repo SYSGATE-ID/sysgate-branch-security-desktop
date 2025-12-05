@@ -81,33 +81,33 @@ export const useIndex = () => {
     openDialogHandler('detailLogGate')
   }
 
-  useEffect(() => {
-    const fetchLogGate = async (): Promise<void> => {
-      try {
-        setLoading((p) => ({ ...p, fetchLogGate: true }))
-        const params = {
-          page: 1,
-          limit: 20,
-          search: ''
-        }
-
-        const response = await gateService.getAllLogGate(params)
-
-        if (response.status_code === 200) {
-          setLogGates(response.data || [])
-          setTotalRows(response.meta?.total || 0)
-        }
-      } catch (error) {
-        const axiosError = error as AxiosError<IErrorResponse>
-        const { title, desc } = toastMessage.loadError('log gate')
-        const message = axiosError.response?.data?.message || desc
-        toast.error(title, {
-          description: message
-        })
-      } finally {
-        setLoading((p) => ({ ...p, fetchLogGate: false }))
+  const fetchLogGate = async (): Promise<void> => {
+    try {
+      setLoading((p) => ({ ...p, fetchLogGate: true }))
+      const params = {
+        page: 1,
+        limit: 20,
+        search: ''
       }
+
+      const response = await gateService.getAllLogGate(params)
+
+      if (response.status_code === 200) {
+        setLogGates(response.data || [])
+        setTotalRows(response.meta?.total || 0)
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<IErrorResponse>
+      const { title, desc } = toastMessage.loadError('log gate')
+      const message = axiosError.response?.data?.message || desc
+      toast.error(title, {
+        description: message
+      })
+    } finally {
+      setLoading((p) => ({ ...p, fetchLogGate: false }))
     }
+  }
+  useEffect(() => {
     fetchLogGate()
   }, [])
 
@@ -338,82 +338,80 @@ Terima kasih.
 
   const stats = generateStats(statistic)
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    const connectWebSocket = () => {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        console.error('Token tidak ditemukan')
-        return
-      }
-
-      const wsUrl = `${ws_url}/gatekeeper?role=KEEPER&client_id=${token}`
-
-      try {
-        ws.current = new WebSocket(wsUrl)
-
-        ws.current.onopen = () => {
-          console.log('WebSocket connected')
-          toast.success('WebSocket Connected', {
-            description: 'Terhubung ke server gatekeeper'
-          })
-        }
-
-        ws.current.onmessage = (event) => {
-          try {
-            const data: IWebSocketData = JSON.parse(event.data)
-            setDataFromWS(data.payload)
-
-            // Handle different message types
-            switch (data.type) {
-              case 'MEMBER_WITH_WRONG_PLATE_NEED_APPROVAL':
-                setWsData(data)
-                openDialogHandler('confirmData')
-                toast.info('Perlu Approval', {
-                  description: 'Ada kendaraan yang perlu persetujuan'
-                })
-                break
-              case 'TICKET_WITH_WRONG_PLATE_NEED_APPROVAL':
-                setWsData(data)
-                openDialogHandler('confirmData')
-                toast.info('Perlu Approval', {
-                  description: 'Ada kendaraan yang perlu persetujuan'
-                })
-                break
-
-              case 'OTHER_MESSAGE_TYPE':
-                // Handle other message types
-                break
-
-              default:
-                console.log('Unknown message type:', data.type)
-            }
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error)
-          }
-        }
-
-        ws.current.onerror = (error) => {
-          console.error('WebSocket error:', error)
-          toast.error('WebSocket Error', {
-            description: 'Terjadi kesalahan pada koneksi'
-          })
-        }
-
-        ws.current.onclose = (event) => {
-          console.log('WebSocket disconnected:', event.code, event.reason)
-          if (event.code !== 1000) {
-            // Reconnect setelah 5 detik jika bukan close normal
-            setTimeout(connectWebSocket, 5000)
-          }
-        }
-      } catch (error) {
-        console.error('Error creating WebSocket:', error)
-      }
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const connectWebSocket = () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      console.error('Token tidak ditemukan')
+      return
     }
 
-    connectWebSocket()
+    const wsUrl = `${ws_url}/gatekeeper?role=KEEPER&client_id=${token}`
 
+    try {
+      ws.current = new WebSocket(wsUrl)
+
+      ws.current.onopen = () => {
+        console.log('WebSocket connected')
+        toast.success('WebSocket Connected', {
+          description: 'Terhubung ke server gatekeeper'
+        })
+      }
+
+      ws.current.onmessage = (event) => {
+        try {
+          const data: IWebSocketData = JSON.parse(event.data)
+          setDataFromWS(data.payload)
+
+          // Handle different message types
+          switch (data.type) {
+            case 'MEMBER_WITH_WRONG_PLATE_NEED_APPROVAL':
+              setWsData(data)
+              openDialogHandler('confirmData')
+              toast.info('Perlu Approval', {
+                description: 'Ada kendaraan yang perlu persetujuan'
+              })
+              break
+            case 'TICKET_WITH_WRONG_PLATE_NEED_APPROVAL':
+              setWsData(data)
+              openDialogHandler('confirmData')
+              toast.info('Perlu Approval', {
+                description: 'Ada kendaraan yang perlu persetujuan'
+              })
+              break
+
+            case 'OTHER_MESSAGE_TYPE':
+              // Handle other message types
+              break
+
+            default:
+              console.log('Unknown message type:', data.type)
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error)
+        }
+      }
+
+      ws.current.onerror = (error) => {
+        console.error('WebSocket error:', error)
+        toast.error('WebSocket Error', {
+          description: 'Terjadi kesalahan pada koneksi'
+        })
+      }
+
+      ws.current.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason)
+        if (event.code !== 1000) {
+          // Reconnect setelah 5 detik jika bukan close normal
+          setTimeout(connectWebSocket, 5000)
+        }
+      }
+    } catch (error) {
+      console.error('Error creating WebSocket:', error)
+    }
+  }
+  useEffect(() => {
+    connectWebSocket()
     // Cleanup function
     return () => {
       if (ws.current) {
@@ -532,6 +530,8 @@ Terima kasih.
     handleGetDetailLogGate,
     handleActionConfirm,
     isWsConnected: ws.current?.readyState === WebSocket.OPEN,
-    dataFromWS
+    dataFromWS,
+    fetchLogGate,
+    connectWebSocket
   }
 }

@@ -34,6 +34,7 @@ export interface ILogGate {
 export interface IPayloadWSChecking {
   gate: IGate
   image: string
+  detected_plate: string
   ticket: IVisitor
   member: IMember
 }

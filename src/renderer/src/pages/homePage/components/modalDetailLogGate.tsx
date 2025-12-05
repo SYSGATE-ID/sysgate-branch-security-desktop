@@ -12,6 +12,7 @@ import {
 import { Button } from '@renderer/components/ui/button'
 import { Badge } from '@renderer/components/ui/badge'
 import { ChevronRight, Ticket, User } from 'lucide-react'
+import { ImageDefault } from '@renderer/components/core/imageDefault'
 
 interface ModalProps {
   data: ILogGate | null
@@ -62,25 +63,13 @@ export const ModalDetailLogGate: React.FC<ModalProps> = ({ openDialog, setOpenDi
                 <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
                 Foto Masuk
               </h1>
-              <img
-                src={getPictureLogGate(data, 1)}
-                alt={convertStatusLogGate[data.action].label}
-                width="100%"
-                height="300px"
-                className="object-cover grayscale"
-              />
+              <ImageDefault width="100%" height="300px" url={getPictureLogGate(data, 1)} />
               <h1 className="mb-4 text-[16px] font-semibold mb-3 flex items-center gap-2">
                 <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
                 Foto Keluar
               </h1>
               {getPictureLogGate(data, 0) !== '' && (
-                <img
-                  src={getPictureLogGate(data, 0)}
-                  alt={convertStatusLogGate[data.action].label}
-                  width="100%"
-                  height="300px"
-                  className="object-cover grayscale"
-                />
+                <ImageDefault width="100%" height="300px" url={getPictureLogGate(data, 0)} />
               )}
             </div>
             <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-6 py-4 flex justify-end">

@@ -19,9 +19,11 @@ import {
   getUserTypeLogGate
 } from '@renderer/utils/myFunctions'
 import { Badge } from '@renderer/components/ui/badge'
-import { Ticket, User } from 'lucide-react'
+import { RefreshCcw, Ticket, User } from 'lucide-react'
 import { ModalDetailVisitor } from './components/modalDetailVisitor'
 import { ModalDetailLogGate } from './components/modalDetailLogGate'
+import { Button } from '@renderer/components/ui/button'
+import { ImageDefault } from '@renderer/components/core/imageDefault'
 
 export const HomePage: React.FC = () => {
   const {
@@ -39,7 +41,9 @@ export const HomePage: React.FC = () => {
     logGates,
     selectedlogGate,
     handleActionConfirm,
-    dataFromWS
+    dataFromWS,
+    fetchLogGate,
+    connectWebSocket
   } = useIndex()
 
   return (
@@ -48,10 +52,13 @@ export const HomePage: React.FC = () => {
       <div className="w-[380px] flex-shrink-0">
         <MyContainer className="rounded-lg border border-gray-200 dark:border-gray-700 h-full flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex justify-between">
             <h2 className="text-base font-bold text-blue-900 dark:text-white">
               Log Keluar/Masuk Gate
             </h2>
+            <Button variant="outline" size="icon" className="h-7 w-7 ml-2">
+              <RefreshCcw onClick={() => fetchLogGate()} />
+            </Button>
           </div>
 
           {/* Activity List */}
@@ -69,13 +76,16 @@ export const HomePage: React.FC = () => {
                     >
                       <a href="#">
                         <ItemMedia variant="image">
-                          <img
+                          <ImageDefault
+                            url={`${convertStatusLogGate[item.action].label === 'IN' ? getPictureLogGate(item, 1) : getPictureLogGate(item, 0)}`}
+                          />
+                          {/* <img
                             src={`${convertStatusLogGate[item.action].label === 'IN' ? getPictureLogGate(item, 1) : getPictureLogGate(item, 0)}`}
                             alt={convertStatusLogGate[item.action].label}
                             width={32}
                             height={32}
                             className="object-cover grayscale"
-                          />
+                          /> */}
                         </ItemMedia>
                         <ItemContent>
                           <ItemTitle className="line-clamp-1">
@@ -131,10 +141,18 @@ export const HomePage: React.FC = () => {
       <div className="flex-1 flex flex-col gap-5 overflow-hidden">
         {/* Dashboard Stats */}
         <MyContainer className="rounded-lg border border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex justify-between">
             <h2 className="text-base font-bold text-blue-900 dark:text-white">
               Data Statistik Hari Ini
             </h2>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-40 ml-2"
+              onClick={() => connectWebSocket()}
+            >
+              Re-Connect Gate
+            </Button>
           </div>
 
           {statistic ? (

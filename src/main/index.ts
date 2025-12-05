@@ -8,6 +8,18 @@ import nodeChildProcess from 'child_process'
 let mainWindow: BrowserWindow | null = null
 let loginWindow: BrowserWindow | null = null
 
+function clearAllLocalStorage(): void {
+  const windows = BrowserWindow.getAllWindows()
+  windows.forEach((win) => {
+    if (!win.isDestroyed()) {
+      win.webContents.executeJavaScript('localStorage.clear()').catch(() => {
+        // Ignore errors jika window sudah dihancurkan
+      })
+    }
+  })
+  console.log('LocalStorage cleared from all windows')
+}
+
 function createLoginWindow(): void {
   // Jika login window sudah ada, focus dan return
   if (loginWindow) {
@@ -43,6 +55,7 @@ function createLoginWindow(): void {
     loginWindow = null
     // Jika login window ditutup dan main window belum ada, tutup app
     if (!mainWindow) {
+      clearAllLocalStorage()
       app.quit()
     }
   })
@@ -140,6 +153,7 @@ ipcMain.on('login-success', () => {
 // Handler untuk logout
 ipcMain.on('logout', () => {
   // Tutup main window dan buka login window
+  clearAllLocalStorage()
   mainWindow?.close()
   mainWindow = null
   createLoginWindow()
@@ -212,13 +226,18 @@ app.whenReady().then(() => {
 })
 
 app.on('before-quit', () => {
-  const windows = BrowserWindow.getAllWindows()
-  windows.forEach((win) => {
-    win.webContents.executeJavaScript('localStorage.clear()')
-  })
+  console.log('App is quitting, clearing localStorage...')
+  clearAllLocalStorage()
+})
+
+app.on('will-quit', () => {
+  console.log('App will quit, ensuring localStorage is cleared...')
+  clearAllLocalStorage()
 })
 
 app.on('window-all-closed', () => {
+  console.log('All windows closed, clearing localStorage...')
+  clearAllLocalStorage()
   if (process.platform !== 'darwin') {
     app.quit()
   }

@@ -146,9 +146,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                         </div>
                         <div>
                           <p className="text-sm text-slate-500 font-medium">No. Plat Terdaftar</p>
-                          <p className="text-black font-bold font-mono bg-slate-100 px-3 py-1.5 rounded-lg inline-block">
-                            {noPlat}
-                          </p>
+                          <p className="text-black font-bold text-green-500">{noPlat || ''}</p>
                         </div>
                       </div>
 
@@ -166,7 +164,9 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                         </div>
                         <div>
                           <p className="text-sm text-slate-500 font-medium">No. Plat Terdeteksi</p>
-                          <p className="text-black font-bold">belum</p>
+                          <p className="text-black font-bold text-red-500">
+                            {data.detected_plate || ''}
+                          </p>
                         </div>
                       </div>
 
@@ -183,7 +183,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                           <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
                             Waktu Keluar
                           </p>
-                          <p className="font-bold text-orange-600">belum</p>
+                          <p className="font-bold text-red-600">belum</p>
                         </div>
                       </div>
                     </div>
