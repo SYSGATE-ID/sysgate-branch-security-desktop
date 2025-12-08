@@ -26,9 +26,13 @@ import { toastMessage } from '@renderer/utils/optionsData'
 import { ILogGate, IPayloadWSChecking } from '@renderer/interface/gate.interface'
 import { useConfigStore } from '@renderer/store/configProvider'
 import { WsResponseAction } from '@renderer/interface/ws.interface'
+import { useWindowInfo } from '@renderer/store/useWindowInfo'
+import { useNavigate } from 'react-router-dom'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
+  const navigate = useNavigate()
+  const { currentWindowType, isMainWindow, windowInfo } = useWindowInfo()
   const userLogin = localStorage.getItem('userLogin')
   const userData = userLogin ? JSON.parse(userLogin) : null
 
@@ -506,6 +510,20 @@ Terima kasih.
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
+
+  useEffect(() => {
+    console.log('Saat ini berada di window:', currentWindowType)
+    console.log('Window info:', windowInfo)
+
+    if (currentWindowType === 'login') {
+      localStorage.clear()
+      navigate('/login')
+    }
+
+    if (isMainWindow) {
+      console.log('Ini adalah main window!')
+    }
+  }, [currentWindowType, isMainWindow])
 
   return {
     statistic,

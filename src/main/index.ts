@@ -20,6 +20,41 @@ function clearAllLocalStorage(): void {
   console.log('LocalStorage cleared from all windows')
 }
 
+ipcMain.handle('get-window-info', (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender)
+  if (!window) return null
+
+  // Mendapatkan URL/window title untuk identifikasi
+  const url = window.webContents.getURL()
+  const title = window.getTitle()
+
+  // Mendeteksi window type berdasarkan URL atau properti lain
+  let windowType = 'unknown'
+
+  if (url.includes('/login') || title.includes('Login')) {
+    windowType = 'login'
+  } else if (url.includes('/home') || title.includes('Home')) {
+    windowType = 'main'
+  }
+
+  // Atau gunakan id window yang sudah kita ketahui
+  if (window === loginWindow) {
+    windowType = 'login'
+  } else if (window === mainWindow) {
+    windowType = 'main'
+  }
+
+  return {
+    id: window.id,
+    type: windowType,
+    url: url,
+    title: title,
+    isMaximized: window.isMaximized(),
+    isMinimized: window.isMinimized(),
+    isFocused: window.isFocused()
+  }
+})
+
 function createLoginWindow(): void {
   // Jika login window sudah ada, focus dan return
   if (loginWindow) {
@@ -68,6 +103,10 @@ function createLoginWindow(): void {
       hash: '/login'
     })
   }
+
+  loginWindow.webContents.on('did-finish-load', () => {
+    loginWindow?.webContents.send('window-type', 'login')
+  })
 }
 
 function createMainWindow(): void {
@@ -96,6 +135,7 @@ function createMainWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
+    mainWindow?.maximize()
     mainWindow?.show()
     mainWindow?.focus()
   })
@@ -241,4 +281,30 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+// Handle uncaught exceptions dan crashes
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error)
+  clearAllLocalStorage()
+  app.quit()
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+  clearAllLocalStorage()
+  app.quit()
+})
+
+// Handle SIGTERM dan SIGINT signals (untuk graceful shutdown)
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, clearing localStorage...')
+  clearAllLocalStorage()
+  app.quit()
+})
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, clearing localStorage...')
+  clearAllLocalStorage()
+  app.quit()
 })

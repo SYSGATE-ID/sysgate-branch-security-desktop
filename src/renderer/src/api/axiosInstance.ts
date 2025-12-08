@@ -124,7 +124,7 @@ export const useAxiosInstance = (): AxiosInstance => {
           description: `Harap login terlebih dahulu.`
         })
         localStorage.clear()
-        // window.electron?.ipcRenderer.send('window-close')
+        window.electron?.ipcRenderer.send('window-close')
         return Promise.reject(error) // Return rejected promise untuk menghentikan chain
       }
 

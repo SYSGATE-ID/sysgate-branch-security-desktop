@@ -56,8 +56,13 @@ export const HomePage: React.FC = () => {
             <h2 className="text-base font-bold text-blue-900 dark:text-white">
               Log Keluar/Masuk Gate
             </h2>
-            <Button variant="outline" size="icon" className="h-7 w-7 ml-2">
-              <RefreshCcw onClick={() => fetchLogGate()} />
+            <Button
+              onClick={() => fetchLogGate()}
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 ml-2"
+            >
+              <RefreshCcw />
             </Button>
           </div>
 
@@ -79,13 +84,6 @@ export const HomePage: React.FC = () => {
                           <ImageDefault
                             url={`${convertStatusLogGate[item.action].label === 'IN' ? getPictureLogGate(item, 1) : getPictureLogGate(item, 0)}`}
                           />
-                          {/* <img
-                            src={`${convertStatusLogGate[item.action].label === 'IN' ? getPictureLogGate(item, 1) : getPictureLogGate(item, 0)}`}
-                            alt={convertStatusLogGate[item.action].label}
-                            width={32}
-                            height={32}
-                            className="object-cover grayscale"
-                          /> */}
                         </ItemMedia>
                         <ItemContent>
                           <ItemTitle className="line-clamp-1">

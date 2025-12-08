@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react'
 // import { useNavigate } from 'react-router-dom'
 import AuthService from '@services/authService'
 import type { IPayloadLogin } from '@interface/auth.interface'
@@ -17,6 +17,7 @@ interface UseIndexReturn {
 }
 
 export const useIndex = (): UseIndexReturn => {
+  const token = localStorage.getItem('token')
   // const navigate = useNavigate()
   const authService = AuthService()
   const { licenseIs } = UseGlobalLayout()
@@ -93,6 +94,17 @@ export const useIndex = (): UseIndexReturn => {
       setLoading({ submit: false })
     }
   }
+
+  useEffect(() => {
+    if (token) {
+      if (window.api && window.api.auth) {
+        window.api.auth.loginSuccess()
+      } else {
+        // Fallback untuk development (browser)
+        window.location.href = '/'
+      }
+    }
+  }, [])
 
   return {
     formLogin,

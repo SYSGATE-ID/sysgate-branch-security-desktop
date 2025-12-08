@@ -85,3 +85,15 @@ export interface IWebSocketData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   meta: any
 }
+
+export interface WindowInfo {
+  id: number
+  type: string
+  url: string
+  title: string
+  isMaximized: boolean
+  isMinimized: boolean
+  isFocused: boolean
+  isLoginWindow?: boolean
+  isMainWindow?: boolean
+}
