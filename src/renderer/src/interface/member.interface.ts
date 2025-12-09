@@ -22,6 +22,20 @@ export interface IMember {
   picture_out: IMedia
   picture_in: IMedia
   tariff: ITariff
+  track?: ITrackGate
+}
+
+export interface ITrackGate {
+  id: number
+  member_id: number
+  vehicle_plate: string
+  last_detected_plate: string
+  entered_at: string
+  exited_at: string
+  created_at: string
+  updated_at: string
+  picture_in: IMedia[]
+  picture_out: IMedia[]
 }
 
 export interface IPayloadMember {

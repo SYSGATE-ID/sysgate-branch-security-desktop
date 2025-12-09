@@ -36,7 +36,7 @@ export const useIndex = () => {
   const userLogin = localStorage.getItem('userLogin')
   const userData = userLogin ? JSON.parse(userLogin) : null
 
-  const { config } = useConfigStore.getState()
+  const { config, assetsPathConfig } = useConfigStore.getState()
   const ws_url = config?.ws_url || ''
 
   const visitorService = VisitorService()
@@ -368,8 +368,11 @@ Terima kasih.
           setDataFromWS(data.payload)
 
           // Handle different message types
+          const audio = new Audio(`${assetsPathConfig}\\sounds\\notif.mp3`)
+
           switch (data.type) {
             case 'MEMBER_WITH_WRONG_PLATE_NEED_APPROVAL':
+              audio.play().catch((err) => console.warn('Gagal memutar suara notif:', err))
               setWsData(data)
               openDialogHandler('confirmData')
               toast.info('Perlu Approval', {
@@ -377,6 +380,7 @@ Terima kasih.
               })
               break
             case 'TICKET_WITH_WRONG_PLATE_NEED_APPROVAL':
+              audio.play().catch((err) => console.warn('Gagal memutar suara notif:', err))
               setWsData(data)
               openDialogHandler('confirmData')
               toast.info('Perlu Approval', {

@@ -5,7 +5,9 @@ import { Separator } from '@renderer/components/ui/separator'
 import { ScrollArea } from '@renderer/components/ui/scroll-area'
 import { CheckCircle2, Ticket, User, X, XCircle } from 'lucide-react'
 import { IPayloadWSChecking } from '@renderer/interface/gate.interface'
-import { useConfigStore } from '@renderer/store/configProvider'
+import { Badge } from '@renderer/components/ui/badge'
+import { ImageDefault } from '@renderer/components/core/imageDefault'
+import { formatDateTime } from '@renderer/utils/myFunctions'
 
 interface ModalConfirmProps {
   openDialog: boolean
@@ -22,13 +24,32 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   handleActionConfirm,
   loading = false
 }) => {
-  const { assetsPathConfig } = useConfigStore()
+  const pictureIn =
+    data &&
+    ((data?.member?.track &&
+      data?.member?.track.picture_in.length > 0 &&
+      data?.member?.track.picture_in[0].image_url) ||
+      data?.image)
 
-  const defaultImage = `${assetsPathConfig}\\images\\no_img.jpg`
+  const pictureOut =
+    data &&
+    ((data?.member?.track &&
+      data?.member?.track.picture_out.length > 0 &&
+      data?.member?.track.picture_out[0].image_url) ||
+      data?.image)
 
-  const pictureIn = data && (data?.ticket?.picture_in?.image_url || data?.image || defaultImage)
-
-  const pictureOut = data && (data?.ticket?.picture_out?.image_url || defaultImage)
+  const timeIn =
+    (data &&
+      data?.member?.track &&
+      data?.member?.track.entered_at &&
+      formatDateTime(data?.member?.track.entered_at)) ||
+    '-'
+  const timeOut =
+    (data &&
+      data?.member?.track &&
+      data?.member?.track.exited_at &&
+      formatDateTime(data?.member?.track.exited_at)) ||
+    '-'
 
   const nama =
     (data && data?.member && data.member.full_name) || (data?.ticket && data.ticket.full_name)
@@ -40,6 +61,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   const tipe =
     (data && data?.member && <span className="text-blue-500">Member</span>) ||
     (data?.ticket && 'Umum')
+
   const tipeIcon =
     (data && data?.member && <User className="h-4 w-4 mt-1 me-3 text-blue-500" />) ||
     (data?.ticket && <Ticket className="h-4 w-4 mt-1 me-3 text-green-500" />)
@@ -118,8 +140,14 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                 <div className="grid grid-cols-2 gap-5 mb-1">
                   {/* Foto Masuk */}
                   <div className="relative aspect-video ps-3">
-                    <img
-                      src={pictureIn}
+                    <Badge
+                      className="absolute ms-2 mt-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200"
+                      variant="default"
+                    >
+                      MASUK
+                    </Badge>
+                    <ImageDefault
+                      url={pictureIn}
                       alt="Foto Masuk Kendaraan"
                       className="w-full h-full object-cover"
                     />
@@ -127,8 +155,14 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
 
                   {/* Foto Keluar */}
                   <div className="relative aspect-video pe-3">
-                    <img
-                      src={pictureOut}
+                    <Badge
+                      className="absolute ms-2 mt-2 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200"
+                      variant="default"
+                    >
+                      KELUAR
+                    </Badge>
+                    <ImageDefault
+                      url={pictureOut}
                       alt="Foto Keluar Kendaraan"
                       className="w-full h-full object-cover"
                     />
@@ -177,13 +211,13 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                           <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
                             Waktu Masuk
                           </p>
-                          <p className="font-bold text-green-600">belum</p>
+                          <p className="font-bold text-green-600">{timeIn}</p>
                         </div>
                         <div>
                           <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
                             Waktu Keluar
                           </p>
-                          <p className="font-bold text-red-600">belum</p>
+                          <p className="font-bold text-red-600">{timeOut}</p>
                         </div>
                       </div>
                     </div>
