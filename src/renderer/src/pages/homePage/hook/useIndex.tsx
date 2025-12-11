@@ -449,6 +449,7 @@ Terima kasih.
     const memberId = dataFromWS?.member?.number
 
     const payload: Record<string, unknown> = {
+      media_id: dataFromWS?.media.id,
       gate_name: dataFromWS?.gate?.name,
       reason: reason || ''
     }

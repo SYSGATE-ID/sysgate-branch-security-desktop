@@ -5,6 +5,7 @@ interface ImageDefaultProps {
   url?: string | null
   alt?: string
   className?: string
+  style?: React.CSSProperties
   rounded?: string // contoh: "rounded-lg"
   width?: string // contoh: "w-full"
   height?: string // contoh: "h-40"
@@ -14,6 +15,7 @@ export const ImageDefault: React.FC<ImageDefaultProps> = ({
   url,
   alt = 'Image',
   className = '',
+  style,
   rounded = 'rounded-lg',
   width = 'w-full',
   height = '',
@@ -24,6 +26,7 @@ export const ImageDefault: React.FC<ImageDefaultProps> = ({
 
   return (
     <img
+      style={style}
       src={imgSrc}
       alt={alt}
       onError={() => setImgSrc(`${assetsPathConfig}\\images\\no_img.jpg`)}

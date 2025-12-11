@@ -1,10 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import React from 'react'
+import React, { JSX } from 'react'
 import { Badge } from '@renderer/components/ui/badge'
 import moment from 'moment/min/moment-with-locales'
 import { MD5 } from 'crypto-js'
 import { STAT_CONFIG } from './optionsData'
-import { ILogGate } from '@renderer/interface/gate.interface'
+import { ILogGate, IPayloadWSChecking } from '@renderer/interface/gate.interface'
+import { Ticket, User } from 'lucide-react'
 
 moment.locale('id')
 
@@ -264,7 +265,7 @@ export const getTariffLogGate = (log: ILogGate): string => {
 
 export const getNoPlatLogGate = (log: ILogGate): string => {
   if (log.member_id) {
-    return log.member?.tariff.code || ''
+    return log.member?.vehicle_plate || ''
   }
   if (log.ticket_id) {
     return log.ticket?.vehicle_plate || ''
@@ -298,5 +299,121 @@ export const convertStatusLogGate: Record<string, { label: string; className: st
     label: 'OUT',
     className:
       'px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200'
+  }
+}
+
+export const getLogGateName = (data: IPayloadWSChecking): string => {
+  if (data.member) {
+    return data.member.full_name
+  } else if (data.ticket) {
+    return data.ticket.full_name
+  } else {
+    return '...'
+  }
+}
+
+export const getLogGatePictureIn = (data: IPayloadWSChecking): string | null => {
+  if (data.member) {
+    return (
+      (data?.current_track &&
+        data?.current_track.picture_in.length > 0 &&
+        data?.current_track.picture_in[0].image_url) ||
+      data?.image
+    )
+  } else if (data.ticket) {
+    return (data?.ticket?.picture_in && data?.ticket?.picture_in[0].image_url) || data?.image
+  } else {
+    return null
+  }
+}
+
+export const getLogGatePictureOut = (data: IPayloadWSChecking): string | null => {
+  if (data.member) {
+    if (data.current_track && data.current_track?.picture_in.length > 0) {
+      if (data.current_track.picture_out.length > 0) {
+        return data.current_track.picture_out[0].image_url
+      } else {
+        return data.image
+      }
+    } else {
+      return null
+    }
+    // return (
+    //   (data?.current_track &&
+    //     data?.current_track.picture_in.length > 0 &&
+    //     ((data?.current_track.picture_out.length > 0 &&
+    //       data?.current_track.picture_in[0].image_url) ||
+    //       null)) ||
+    //   null
+    // )
+  } else if (data.ticket) {
+    return (data?.ticket?.picture_out && data?.ticket?.picture_out[0].image_url) || null
+  } else {
+    return null
+  }
+}
+
+export const getLogGateTimeIn = (data: IPayloadWSChecking): string | null => {
+  if (data.member) {
+    return (
+      (data?.current_track &&
+        data?.current_track.entered_at &&
+        formatDateTime(data?.current_track.entered_at)) ||
+      '-'
+    )
+  } else if (data.ticket) {
+    return formatDateTime(data?.ticket?.entered_at) || '-'
+  } else {
+    return '-'
+  }
+}
+
+export const getLogGateTimeOut = (data: IPayloadWSChecking): string | null => {
+  if (data.member) {
+    return (
+      (data?.current_track &&
+        data?.current_track.exited_at &&
+        formatDateTime(data?.current_track.exited_at)) ||
+      '-'
+    )
+  } else if (data.ticket) {
+    return formatDateTime(data?.ticket?.exited_at) || '-'
+  } else {
+    return '-'
+  }
+}
+
+export const getLogGateNoPlat = (data: IPayloadWSChecking): string | null => {
+  if (data.member) {
+    return data.member.vehicle_plate || ''
+  } else if (data.ticket) {
+    return data?.ticket?.vehicle_plate || null
+  } else {
+    return '-'
+  }
+}
+
+export const getLogGateTipe = (data: IPayloadWSChecking): JSX.Element => {
+  if (data.member) {
+    return (
+      <>
+        <User className="h-4 w-4 mt-1 me-3 text-blue-500" />
+        <span className="text-blue-500">Member</span>
+      </>
+    )
+  } else if (data.ticket) {
+    return (
+      <>
+        <Ticket className="h-4 w-4 mt-1 me-3 text-green-500" />
+        <span className="text-green-500">Umum</span>
+      </>
+    )
+  } else {
+    return (
+      <>
+        <Ticket className="h-4 w-4 mt-1 me-3 text-gray-500" />
+        <span className="text-gray-500">Tidak Diketahui</span>
+      </>
+    )
   }
 }

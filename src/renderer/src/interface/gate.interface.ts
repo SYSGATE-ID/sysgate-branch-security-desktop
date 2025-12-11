@@ -1,4 +1,5 @@
-import { IMember } from './member.interface'
+import { IMedia } from './media.interface'
+import { IMember, ITrackGate } from './member.interface'
 import { IVisitor } from './visitor.interface'
 
 export interface IGate {
@@ -34,7 +35,9 @@ export interface ILogGate {
 export interface IPayloadWSChecking {
   gate: IGate
   image: string
+  media: IMedia
   detected_plate: string
+  current_track?: ITrackGate
   ticket: IVisitor
   member: IMember
 }

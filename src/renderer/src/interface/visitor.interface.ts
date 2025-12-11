@@ -26,6 +26,10 @@ export interface IVisitor {
   tariff: ITariff
   picture_out: IMedia
   picture_in: IMedia
+  time_out: string
+  time_in: string
+  entered_at: string
+  exited_at: string
 }
 
 export interface IPayloadVisitor {

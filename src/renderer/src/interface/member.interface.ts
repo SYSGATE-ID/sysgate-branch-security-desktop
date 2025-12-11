@@ -22,7 +22,6 @@ export interface IMember {
   picture_out: IMedia
   picture_in: IMedia
   tariff: ITariff
-  track?: ITrackGate
 }
 
 export interface ITrackGate {

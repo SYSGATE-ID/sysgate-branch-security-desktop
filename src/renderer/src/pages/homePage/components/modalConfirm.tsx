@@ -3,11 +3,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/comp
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { ScrollArea } from '@renderer/components/ui/scroll-area'
-import { CheckCircle2, Ticket, User, X, XCircle } from 'lucide-react'
+import { CheckCircle2, X, XCircle } from 'lucide-react'
 import { IPayloadWSChecking } from '@renderer/interface/gate.interface'
 import { Badge } from '@renderer/components/ui/badge'
 import { ImageDefault } from '@renderer/components/core/imageDefault'
-import { formatDateTime } from '@renderer/utils/myFunctions'
+import {
+  getLogGateName,
+  getLogGateNoPlat,
+  getLogGatePictureIn,
+  getLogGatePictureOut,
+  getLogGateTimeIn,
+  getLogGateTimeOut,
+  getLogGateTipe
+} from '@renderer/utils/myFunctions'
 
 interface ModalConfirmProps {
   openDialog: boolean
@@ -24,47 +32,14 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   handleActionConfirm,
   loading = false
 }) => {
-  const pictureIn =
-    data &&
-    ((data?.member?.track &&
-      data?.member?.track.picture_in.length > 0 &&
-      data?.member?.track.picture_in[0].image_url) ||
-      data?.image)
-
-  const pictureOut =
-    data &&
-    ((data?.member?.track &&
-      data?.member?.track.picture_out.length > 0 &&
-      data?.member?.track.picture_out[0].image_url) ||
-      data?.image)
-
-  const timeIn =
-    (data &&
-      data?.member?.track &&
-      data?.member?.track.entered_at &&
-      formatDateTime(data?.member?.track.entered_at)) ||
-    '-'
-  const timeOut =
-    (data &&
-      data?.member?.track &&
-      data?.member?.track.exited_at &&
-      formatDateTime(data?.member?.track.exited_at)) ||
-    '-'
-
-  const nama =
-    (data && data?.member && data.member.full_name) || (data?.ticket && data.ticket.full_name)
-
-  const noPlat =
-    (data && data?.member && data.member.vehicle_plate) ||
-    (data?.ticket && data.ticket.vehicle_plate)
-
-  const tipe =
-    (data && data?.member && <span className="text-blue-500">Member</span>) ||
-    (data?.ticket && 'Umum')
-
-  const tipeIcon =
-    (data && data?.member && <User className="h-4 w-4 mt-1 me-3 text-blue-500" />) ||
-    (data?.ticket && <Ticket className="h-4 w-4 mt-1 me-3 text-green-500" />)
+  const pictureForCheck = data && data.image
+  const pictureIn = data && getLogGatePictureIn(data)
+  const pictureOut = data && getLogGatePictureOut(data)
+  const timeIn = data && getLogGateTimeIn(data)
+  const timeOut = data && getLogGateTimeOut(data)
+  const nama = data && getLogGateName(data)
+  const noPlat = data && getLogGateNoPlat(data)
+  const tipe = data && getLogGateTipe(data)
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -149,7 +124,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                     <ImageDefault
                       url={pictureIn}
                       alt="Foto Masuk Kendaraan"
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover ${pictureIn === pictureForCheck && 'border-3 border-red-500'}`}
                     />
                   </div>
 
@@ -164,7 +139,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                     <ImageDefault
                       url={pictureOut}
                       alt="Foto Keluar Kendaraan"
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover ${pictureOut === pictureForCheck && 'border- border-red-500'}`}
                     />
                   </div>
                 </div>
@@ -191,10 +166,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                           <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
                             Tipe
                           </p>
-                          <p className="text-black font-bold flex">
-                            {tipeIcon}
-                            {tipe}
-                          </p>
+                          <p className="text-black font-bold flex">{tipe}</p>
                         </div>
                         <div>
                           <p className="text-sm text-slate-500 font-medium">No. Plat Terdeteksi</p>
