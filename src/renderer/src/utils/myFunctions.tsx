@@ -314,14 +314,17 @@ export const getLogGateName = (data: IPayloadWSChecking): string => {
 
 export const getLogGatePictureIn = (data: IPayloadWSChecking): string | null => {
   if (data.member) {
-    return (
-      (data?.current_track &&
-        data?.current_track.picture_in.length > 0 &&
-        data?.current_track.picture_in[0].image_url) ||
-      data?.image
-    )
+    if (data.current_track) {
+      if (data.current_track?.picture_in.length > 0) {
+        return data.current_track.picture_in[0].image_url
+      } else {
+        return data.image
+      }
+    } else {
+      return data.image
+    }
   } else if (data.ticket) {
-    return (data?.ticket?.picture_in && data?.ticket?.picture_in[0].image_url) || data?.image
+    return (data?.ticket?.picture_out && data?.ticket?.picture_out[0].image_url) || null
   } else {
     return null
   }
@@ -338,14 +341,6 @@ export const getLogGatePictureOut = (data: IPayloadWSChecking): string | null =>
     } else {
       return null
     }
-    // return (
-    //   (data?.current_track &&
-    //     data?.current_track.picture_in.length > 0 &&
-    //     ((data?.current_track.picture_out.length > 0 &&
-    //       data?.current_track.picture_in[0].image_url) ||
-    //       null)) ||
-    //   null
-    // )
   } else if (data.ticket) {
     return (data?.ticket?.picture_out && data?.ticket?.picture_out[0].image_url) || null
   } else {

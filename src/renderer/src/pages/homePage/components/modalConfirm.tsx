@@ -139,7 +139,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
                     <ImageDefault
                       url={pictureOut}
                       alt="Foto Keluar Kendaraan"
-                      className={`w-full h-full object-cover ${pictureOut === pictureForCheck && 'border- border-red-500'}`}
+                      className={`w-full h-full object-cover ${pictureOut === pictureForCheck && 'border-3 border-red-500'}`}
                     />
                   </div>
                 </div>
