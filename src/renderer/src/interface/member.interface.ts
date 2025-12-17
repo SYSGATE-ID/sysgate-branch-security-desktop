@@ -33,8 +33,8 @@ export interface ITrackGate {
   exited_at: string
   created_at: string
   updated_at: string
-  picture_in: IMedia[]
-  picture_out: IMedia[]
+  picture_in: IMedia
+  picture_out: IMedia
 }
 
 export interface IPayloadMember {

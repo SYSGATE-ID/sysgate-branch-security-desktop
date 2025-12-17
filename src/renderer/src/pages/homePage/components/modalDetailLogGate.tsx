@@ -32,7 +32,7 @@ export const ModalDetailLogGate: React.FC<ModalProps> = ({ openDialog, setOpenDi
                 <h2 className="text-2xl font-bold mb-1">
                   {getTariffLogGate(data)} - {getNoPlatLogGate(data)}
                 </h2>
-                <p className="text-blue-100 fw-medium text-sm flex items-center gap-4">
+                <div className="text-blue-100 fw-medium text-sm flex items-center gap-4">
                   {formatDateTime(data.created_at.toString()) || ''}
                   <ChevronRight size={12} />
                   <span className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export const ModalDetailLogGate: React.FC<ModalProps> = ({ openDialog, setOpenDi
                   <Badge className={`${convertStatusLogGate[data.action].className}`}>
                     {convertStatusLogGate[data.action].label}
                   </Badge>
-                </p>
+                </div>
               </div>
             </div>
             {/* Body */}

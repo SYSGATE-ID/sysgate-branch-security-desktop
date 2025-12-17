@@ -315,16 +315,16 @@ export const getLogGateName = (data: IPayloadWSChecking): string => {
 export const getLogGatePictureIn = (data: IPayloadWSChecking): string | null => {
   if (data.member) {
     if (data.current_track) {
-      if (data.current_track?.picture_in.length > 0) {
-        return data.current_track.picture_in[0].image_url
+      if (data.current_track.picture_in) {
+        return data.current_track.picture_in.image_url
       } else {
-        return data.image
+        return null
       }
     } else {
       return data.image
     }
   } else if (data.ticket) {
-    return (data?.ticket?.picture_out && data?.ticket?.picture_out[0].image_url) || null
+    return (data?.ticket?.picture_out && data?.ticket?.picture_out.image_url) || null
   } else {
     return null
   }
@@ -332,11 +332,15 @@ export const getLogGatePictureIn = (data: IPayloadWSChecking): string | null => 
 
 export const getLogGatePictureOut = (data: IPayloadWSChecking): string | null => {
   if (data.member) {
-    if (data.current_track && data.current_track?.picture_in.length > 0) {
-      if (data.current_track.picture_out.length > 0) {
-        return data.current_track.picture_out[0].image_url
+    if (data.current_track) {
+      if (data.current_track?.picture_in) {
+        if (data.current_track.picture_out) {
+          return data.current_track.picture_out.image_url
+        } else {
+          return data.image
+        }
       } else {
-        return data.image
+        return null
       }
     } else {
       return null

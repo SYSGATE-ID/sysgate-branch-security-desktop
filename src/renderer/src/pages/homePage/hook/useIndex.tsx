@@ -32,7 +32,7 @@ import { useNavigate } from 'react-router-dom'
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
   const navigate = useNavigate()
-  const { currentWindowType, isMainWindow, windowInfo } = useWindowInfo()
+  const { currentWindowType, isMainWindow } = useWindowInfo()
   const userLogin = localStorage.getItem('userLogin')
   const userData = userLogin ? JSON.parse(userLogin) : null
 
@@ -356,7 +356,6 @@ Terima kasih.
       ws.current = new WebSocket(wsUrl)
 
       ws.current.onopen = () => {
-        console.log('WebSocket connected')
         toast.success('WebSocket Connected', {
           description: 'Terhubung ke server gatekeeper'
         })
@@ -408,7 +407,6 @@ Terima kasih.
       }
 
       ws.current.onclose = (event) => {
-        console.log('WebSocket disconnected:', event.code, event.reason)
         if (event.code !== 1000) {
           // Reconnect setelah 5 detik jika bukan close normal
           setTimeout(connectWebSocket, 5000)
@@ -487,18 +485,27 @@ Terima kasih.
     }
   }
 
-  const handleActionConfirm = (type: 'APPROVE' | 'REJECT', data: IPayloadWSChecking): void => {
-    if (type === 'APPROVE') {
-      if (data.member) {
-        return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_MEMBER)
+  const handleActionConfirm = async (
+    type: 'APPROVE' | 'REJECT',
+    data: IPayloadWSChecking
+  ): Promise<void> => {
+    try {
+      if (type === 'APPROVE') {
+        if (data.member) {
+          return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_MEMBER)
+        }
+        return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_TICKET)
+      } else {
+        const reason = `Ditolak oleh operator ${userData.username}`
+        if (data.member) {
+          return sendWsResponse(WsResponseAction.KEEPER_DENY_ACCESS_WITH_WRONG_PLATE_MEMBER, reason)
+        }
+        return sendWsResponse(WsResponseAction.KEEPER_DENY_ACCESS_WITH_WRONG_PLATE_TICKET, reason)
       }
-      return sendWsResponse(WsResponseAction.KEEPER_APPROVE_ACCESS_WITH_WRONG_PLATE_TICKET)
-    } else {
-      const reason = `Ditolak oleh operator ${userData.username}`
-      if (data.member) {
-        return sendWsResponse(WsResponseAction.KEEPER_DENY_ACCESS_WITH_WRONG_PLATE_MEMBER, reason)
-      }
-      return sendWsResponse(WsResponseAction.KEEPER_DENY_ACCESS_WITH_WRONG_PLATE_TICKET, reason)
+    } catch (err) {
+      console.log(err)
+    } finally {
+      await fetchLogGate()
     }
   }
 
@@ -517,16 +524,9 @@ Terima kasih.
   }, [])
 
   useEffect(() => {
-    console.log('Saat ini berada di window:', currentWindowType)
-    console.log('Window info:', windowInfo)
-
     if (currentWindowType === 'login') {
       localStorage.clear()
       navigate('/login')
-    }
-
-    if (isMainWindow) {
-      console.log('Ini adalah main window!')
     }
   }, [currentWindowType, isMainWindow])
 

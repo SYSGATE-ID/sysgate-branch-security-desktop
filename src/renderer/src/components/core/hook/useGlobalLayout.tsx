@@ -32,7 +32,6 @@ export const UseGlobalLayout = () => {
       secLicense = getDigitMD5Serial(recursiveMD5('25SYSGATEE#PT' + secProductId + 'ELECTRONN', 10))
       if (secLicense === myLicense) {
         setLicenseIs(true)
-        console.log('license valid')
       } else {
         console.error('license invalid')
       }

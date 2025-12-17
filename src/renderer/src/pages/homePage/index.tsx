@@ -166,12 +166,12 @@ export const HomePage: React.FC = () => {
                     <div className="flex items-center justify-between w-full">
                       {/* Label dan angka */}
                       <div>
-                        <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
+                        <div className="text-slate-600 dark:text-slate-400 text-sm font-medium">
                           {stat.label}
-                        </p>
-                        <p className={`text-2xl font-bold ${stat.textLight} ${stat.textDark}`}>
+                        </div>
+                        <div className={`text-2xl font-bold ${stat.textLight} ${stat.textDark}`}>
                           {stat.value.toLocaleString()}
-                        </p>
+                        </div>
                       </div>
 
                       {/* Icon di kanan */}
