@@ -10,14 +10,7 @@ import {
   ItemTitle
 } from '@renderer/components/ui/item'
 import { ModalConfirm } from './components/modalConfirm'
-import {
-  convertStatusLogGate,
-  formatDateTime,
-  getNoPlatLogGate,
-  getPictureLogGate,
-  getTariffLogGate,
-  getUserTypeLogGate
-} from '@renderer/utils/myFunctions'
+import { convertStatusLogGate, formatDateTime } from '@renderer/utils/myFunctions'
 import { Badge } from '@renderer/components/ui/badge'
 import { RefreshCcw, Ticket, User } from 'lucide-react'
 import { ModalDetailVisitor } from './components/modalDetailVisitor'
@@ -74,39 +67,38 @@ export const HomePage: React.FC = () => {
                   logGates.map((item, index) => (
                     <Item
                       key={index}
-                      onClick={() => handleGetDetailLogGate(item.id)}
+                      onClick={() => handleGetDetailLogGate(item)}
                       variant="outline"
                       asChild
                       role="listitem"
                     >
                       <a href="#">
                         <ItemMedia variant="image">
-                          <ImageDefault
-                            url={`${convertStatusLogGate[item.action].label === 'IN' ? getPictureLogGate(item, 1) : getPictureLogGate(item, 0)}`}
-                          />
+                          <ImageDefault url={item.picture && item.picture.image_url} />
                         </ItemMedia>
                         <ItemContent>
                           <ItemTitle className="line-clamp-1">
                             <span className="text-muted-foreground">
-                              {getTariffLogGate(item)} - {getNoPlatLogGate(item)}
+                              {item.tariff && item.tariff.code} - {item.vehicle_plat || ''}
                             </span>
                           </ItemTitle>
                           <ItemDescription>
                             <div className="flex items-center gap-2">
-                              {getUserTypeLogGate(item) === 'member' ? (
+                              {item.access_type === 'MEMBER' ? (
                                 <>
-                                  <User className="h-4 w-4 text-blue-500" />
-                                  <span className="text-sm">Member</span>
+                                  <User className="h-4 w-4" />
+                                  <span className="text-sm">{item.access_type}</span>
                                 </>
-                              ) : getUserTypeLogGate(item) === 'ticket' ? (
+                              ) : item.access_type === 'TICKET' ? (
                                 <>
-                                  <Ticket className="h-4 w-4 text-green-500" />
-                                  <span className="text-sm">Umum</span>
+                                  <Ticket className="h-4 w-4" />
+                                  <span className="text-sm">{item.access_type}</span>
                                 </>
                               ) : (
                                 <span className="text-sm text-gray-500">Unknown</span>
                               )}
                             </div>
+                            {/* <div className="text-xs">{item.description}</div> */}
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatDateTime(item.created_at.toString())}
                             </span>

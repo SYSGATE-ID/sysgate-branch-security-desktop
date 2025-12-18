@@ -7,6 +7,7 @@ import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { UseGlobalLayout } from '@renderer/components/core/hook/useGlobalLayout'
 import { LoggerService } from '@renderer/services/loggerService'
+import { useWindowInfo } from '@renderer/store/useWindowInfo'
 
 interface UseIndexReturn {
   formLogin: IPayloadLogin
@@ -18,6 +19,7 @@ interface UseIndexReturn {
 
 export const useIndex = (): UseIndexReturn => {
   const token = localStorage.getItem('token')
+  const { currentWindowType, isMainWindow } = useWindowInfo()
   // const navigate = useNavigate()
   const authService = AuthService()
   const { licenseIs } = UseGlobalLayout()
@@ -96,12 +98,26 @@ export const useIndex = (): UseIndexReturn => {
   }
 
   useEffect(() => {
+    // if (currentWindowType === 'login') {
+    //   localStorage.clear()
+    //   navigate('/login')
+    // }
+
+    if (currentWindowType === 'main') {
+      if (window.electron && window.electron.ipcRenderer) {
+        window.electron.ipcRenderer.send('logout')
+      } else {
+        window.location.href = '/login'
+      }
+    }
+  }, [currentWindowType, isMainWindow])
+
+  useEffect(() => {
     if (token) {
       if (window.api && window.api.auth) {
         window.api.auth.loginSuccess()
       } else {
-        // Fallback untuk development (browser)
-        window.location.href = '/'
+        window.location.href = '/login'
       }
     }
   }, [])

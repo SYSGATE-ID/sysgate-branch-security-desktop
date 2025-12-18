@@ -1,5 +1,6 @@
 import { IMedia } from './media.interface'
 import { IMember, ITrackGate } from './member.interface'
+import { ITariff } from './tariff.interface'
 import { IVisitor } from './visitor.interface'
 
 export interface IGate {
@@ -25,11 +26,12 @@ export interface ILogGate {
   gate_id: number
   action: string
   created_at: Date
-  member_id: number
-  ticket_id: number
-  gate: IGate
-  member: IMember
-  ticket: IVisitor | null
+  description: string
+  vehicle_plat: string
+  model_id: number
+  access_type: string
+  tariff: ITariff
+  picture: IMedia
 }
 
 export interface IPayloadWSChecking {

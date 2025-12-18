@@ -80,8 +80,8 @@ export const useIndex = () => {
     setWsData(null)
   }
 
-  const handleGetDetailLogGate = async (id: number): Promise<void> => {
-    await fetchDetailLog(id)
+  const handleGetDetailLogGate = async (item: ILogGate): Promise<void> => {
+    setSelectedLogGate(item)
     openDialogHandler('detailLogGate')
   }
 

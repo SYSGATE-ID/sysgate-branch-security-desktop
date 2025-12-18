@@ -324,7 +324,11 @@ export const getLogGatePictureIn = (data: IPayloadWSChecking): string | null => 
       return data.image
     }
   } else if (data.ticket) {
-    return (data?.ticket?.picture_out && data?.ticket?.picture_out.image_url) || null
+    if (data.ticket.picture_in) {
+      return data.ticket.picture_in.image_url
+    } else {
+      return data.image
+    }
   } else {
     return null
   }
