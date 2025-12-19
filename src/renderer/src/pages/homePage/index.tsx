@@ -79,7 +79,8 @@ export const HomePage: React.FC = () => {
                         <ItemContent>
                           <ItemTitle className="line-clamp-1">
                             <span className="text-muted-foreground">
-                              {item.tariff && item.tariff.code} - {item.vehicle_plat || ''}
+                              {item.tariff && item.tariff.code}{' '}
+                              {(item.vehicle_plat && '-' + item.vehicle_plat) || ''}
                             </span>
                           </ItemTitle>
                           <ItemDescription>

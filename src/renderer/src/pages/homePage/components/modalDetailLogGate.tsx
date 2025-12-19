@@ -1,7 +1,7 @@
 import React from 'react'
 import { Dialog, DialogContent } from '@renderer/components/ui/dialog'
 import { ILogGate } from '@renderer/interface/gate.interface'
-import { convertStatusLogGate, formatDateTime, getNoPlatLogGate } from '@renderer/utils/myFunctions'
+import { convertStatusLogGate, formatDateTime } from '@renderer/utils/myFunctions'
 import { Button } from '@renderer/components/ui/button'
 import { Badge } from '@renderer/components/ui/badge'
 import { ChevronRight, Ticket, User } from 'lucide-react'
@@ -23,7 +23,8 @@ export const ModalDetailLogGate: React.FC<ModalProps> = ({ openDialog, setOpenDi
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 text-white flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold mb-1">
-                  {data.tariff && data.tariff.code} - {getNoPlatLogGate(data)}
+                  {data.tariff && data.tariff.code}
+                  {(data.vehicle_plat && '-' + data.vehicle_plat) || ''}
                 </h2>
                 <div className="text-blue-100 fw-medium text-sm flex items-center gap-4">
                   {formatDateTime(data.created_at.toString()) || ''}
