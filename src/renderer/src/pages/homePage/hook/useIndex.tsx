@@ -81,8 +81,9 @@ export const useIndex = () => {
   }
 
   const handleGetDetailLogGate = async (item: ILogGate): Promise<void> => {
-    setSelectedLogGate(item)
     openDialogHandler('detailLogGate')
+    await fetchDetailLog(item.id)
+    // setSelectedLogGate(item)
   }
 
   const fetchLogGate = async (): Promise<void> => {
@@ -151,6 +152,7 @@ export const useIndex = () => {
 
   const fetchDetailLog = async (id: number): Promise<void> => {
     try {
+      setSelectedLogGate(null)
       setLoading({ ...loading, fetchDetailLogGate: true })
       const response = await gateService.getDetailLogGate(id.toString())
 
