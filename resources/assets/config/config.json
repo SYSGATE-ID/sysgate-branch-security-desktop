@@ -1,5 +1,5 @@
 {
-  "api_url": "http://192.168.4.110:3000",
-  "ws_url": "http://192.168.4.110:3000/ws",
+  "api_url": "https://api.azzahrawardani.my.id",
+  "ws_url": "https://api.azzahrawardani.my.id/ws",
   "license": "4928935844"
 }

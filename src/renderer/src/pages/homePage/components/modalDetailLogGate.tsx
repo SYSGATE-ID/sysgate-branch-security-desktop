@@ -64,7 +64,11 @@ export const ModalDetailLogGate: React.FC<ModalProps> = ({ openDialog, setOpenDi
                 <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
                 Foto Masuk
               </h1>
-              <ImageDefault width="100%" height="300px" url={data.picture.image_url} />
+              <ImageDefault
+                width="100%"
+                height="300px"
+                url={data.picture && data.picture.image_url}
+              />
             </div>
             <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-6 py-4 flex justify-end">
               <Button variant="outline" onClick={() => setOpenDialog(false)}>

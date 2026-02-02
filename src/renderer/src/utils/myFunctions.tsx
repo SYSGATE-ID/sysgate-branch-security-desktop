@@ -6,6 +6,7 @@ import { MD5 } from 'crypto-js'
 import { STAT_CONFIG } from './optionsData'
 import { IPayloadWSChecking } from '@renderer/interface/gate.interface'
 import { Ticket, User } from 'lucide-react'
+import { AppConfigKey, IAppConfig } from '@renderer/interface/appConfig.interface'
 
 moment.locale('id')
 
@@ -380,5 +381,59 @@ export const getLogGateTipe = (data: IPayloadWSChecking): JSX.Element => {
         <span className="text-gray-500">Tidak Diketahui</span>
       </>
     )
+  }
+}
+export const lowercaseFirst = (str: string): string => {
+  if (!str) return ''
+  return str.charAt(0).toLowerCase() + str.slice(1)
+}
+
+const appConfig = localStorage.getItem('appConfig')
+
+export const getDivisionName = (upper: number = 1): string => {
+  if (upper === 1) {
+    return (getValueAppConfig('DIVISION-LABEL') as string) || 'Divisi'
+  } else {
+    return lowercaseFirst(getValueAppConfig('DIVISION-LABEL') as string) || 'divisi'
+  }
+}
+
+export const getDepartementName = (upper: number = 1): string => {
+  if (upper === 1) {
+    return (getValueAppConfig('DEPARTMENT-LABEL') as string) || 'Departemen'
+  } else {
+    return lowercaseFirst(getValueAppConfig('DEPARTMENT-LABEL') as string) || 'departemen'
+  }
+}
+
+export const getMemberName = (upper: number = 1): string => {
+  if (upper === 1) {
+    return (getValueAppConfig('MEMBER-LABEL') as string) || 'Member'
+  } else {
+    return lowercaseFirst(getValueAppConfig('MEMBER-LABEL') as string) || 'member'
+  }
+}
+
+export const getValueAppConfig = (key: AppConfigKey): string | number | boolean | null => {
+  try {
+    if (!appConfig) return null
+
+    const parsedConfig: IAppConfig[] = JSON.parse(appConfig)
+    const configItem = parsedConfig.find((item) => item.key === key)
+
+    if (!configItem) return null
+
+    // auto cast based on type
+    switch (configItem.type) {
+      case 'boolean':
+        return configItem.value === 'true'
+      case 'number':
+        return Number(configItem.value)
+      default:
+        return configItem.value
+    }
+  } catch (error) {
+    console.error('Failed to get app config:', error)
+    return null
   }
 }

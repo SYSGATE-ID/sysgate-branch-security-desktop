@@ -8,11 +8,11 @@ interface GateService {
   getAllGate: (params?: object) => Promise<IResponse<IGate[]>>
   getAllLogGate: (params?: object) => Promise<IResponse<ILogGate[]>>
   getDetailGate: (id: string) => Promise<IResponse<IGate>>
-  getDetailLogGate: (id: string) => Promise<IResponse<ILogGate>>
   createGate: (data: IPayloadGate) => Promise<IResponse>
   updateGate: (id: string, data: IPayloadGate) => Promise<IResponse>
   deleteGate: (id: number) => Promise<IResponse>
   getTypeGate: () => Promise<IResponse<[]>>
+  getDetailLogGate: (id: string) => Promise<IResponse<ILogGate>>
 }
 
 const GateService = (): GateService => {
@@ -66,7 +66,7 @@ const GateService = (): GateService => {
   const getDetailLogGate = async (id: string): Promise<IResponse<ILogGate>> => {
     try {
       const response: AxiosResponse<IResponse<ILogGate>> = await axiosInstance.get(
-        `/gate/log/${id}`
+        `/gate-log/${id}`
       )
       return response.data
     } catch (error) {

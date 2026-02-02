@@ -14,6 +14,7 @@ import {
   convertStatusTicket,
   formatDateTime,
   generateStats,
+  getValueAppConfig,
   toPlus62
 } from '@renderer/utils/myFunctions'
 import { Button } from '@renderer/components/ui/button'
@@ -418,12 +419,14 @@ Terima kasih.
       console.error('Error creating WebSocket:', error)
     }
   }
+
   useEffect(() => {
-    connectWebSocket()
-    // Cleanup function
-    return () => {
-      if (ws.current) {
-        ws.current.close(1000, 'Component unmounting')
+    if (getValueAppConfig('CAN-MANUAL-APPROVAL')) {
+      connectWebSocket()
+      return () => {
+        if (ws.current) {
+          ws.current.close(1000, 'Component unmounting')
+        }
       }
     }
   }, [])

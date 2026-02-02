@@ -1,28 +1,50 @@
-// hooks/useAxiosInstance.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useConfigStore } from '@renderer/store/configProvider'
 import { LoggerService } from '@services/loggerService'
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
-export const useAxiosInstance = (): AxiosInstance => {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const useAxiosInstance = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { config } = useConfigStore.getState() // langsung akses tanpa hook
   const baseURL = config?.api_url || 'http://localhost/3003'
-  const token = localStorage.getItem('token')
+
+  // Flag untuk mencegah multiple refresh token calls
+  let isRefreshing = false
+  let failedQueue: Array<{
+    resolve: (value?: any) => void
+    reject: (error?: any) => void
+  }> = []
+
+  const processQueue = (error: any = null): void => {
+    failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error)
+      } else {
+        prom.resolve()
+      }
+    })
+    failedQueue = []
+  }
 
   const instance = axios.create({
     baseURL: `${baseURL}/api/v1`,
+    withCredentials: true,
     headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` })
+      'Content-Type': 'application/json'
     }
   })
 
   // Fungsi untuk mendapatkan informasi halaman saat ini
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const getCurrentPageInfo = () => {
+  const getCurrentPageInfo = (): {
+    path: string
+    fullPath: string
+    route: string
+    timestamp: string
+  } => {
     return {
       path: location.pathname,
       fullPath: location.pathname + location.search,
@@ -102,39 +124,94 @@ export const useAxiosInstance = (): AxiosInstance => {
       })
       return response
     },
-    (error) => {
+    async (error) => {
+      const originalRequest = error.config
       const status = error.response?.status
       const url = error.config?.url
       const method = error.config?.method?.toUpperCase()
       const pageInfo = getCurrentPageInfo()
 
-      if (status === 401) {
-        LoggerService.warn('AxiosInstance.Auth', 'Unauthorized access - redirecting to login', {
-          reason: 'Token expired or invalid',
-          actions: 'Clearing storage and redirecting',
-          meta: {
-            page: pageInfo,
-            previousPage: location.pathname
-          }
-        })
-        localStorage.clear()
-        toast.warning('Akses Ditolak', {
-          description: `Harap login terlebih dahulu.`
-        })
-        localStorage.clear()
-        // window.electron?.ipcRenderer.send('window-close')
-        if (window.electron && window.electron.ipcRenderer) {
-          window.electron.ipcRenderer.send('logout')
-        } else {
-          window.location.href = '/login'
+      // Handle 401 - Unauthorized
+      if (status === 401 && !originalRequest._retry) {
+        // Jika sedang proses refresh, masukkan request ke queue
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject })
+          })
+            .then(() => {
+              return instance(originalRequest)
+            })
+            .catch((err) => {
+              return Promise.reject(err)
+            })
         }
-        return Promise.reject(error) // Return rejected promise untuk menghentikan chain
+
+        originalRequest._retry = true
+        isRefreshing = true
+
+        LoggerService.info('AxiosInstance.Auth', 'Attempting to refresh token', {
+          request: {
+            url: originalRequest.url,
+            method: originalRequest.method
+          },
+          params: originalRequest.params
+        })
+
+        try {
+          // Refresh token
+          const refreshResponse = await axios.post(
+            `${baseURL}/api/v1/auth/refresh`,
+            {},
+            { withCredentials: true }
+          )
+
+          const newToken = refreshResponse.data?.data?.token
+
+          if (newToken) {
+            localStorage.setItem('token', newToken)
+
+            LoggerService.info('AxiosInstance.Auth', 'Token refreshed successfully', {
+              meta: {
+                page: pageInfo
+              }
+            })
+
+            // Process queued requests
+            processQueue()
+            isRefreshing = false
+
+            // Retry original request
+            return instance(originalRequest)
+          } else {
+            throw new Error('No token received from refresh endpoint')
+          }
+        } catch (refreshError) {
+          // Refresh token gagal
+          processQueue(refreshError)
+          isRefreshing = false
+
+          LoggerService.error('AxiosInstance.Auth', 'Token refresh failed - redirecting to login', {
+            error: refreshError instanceof Error ? refreshError.message : 'Unknown error',
+            // actions: "Clearing storage and redirecting",
+            meta: {
+              page: pageInfo,
+              previousPage: location.pathname
+            }
+          })
+
+          localStorage.clear()
+          toast.warning('Akses Ditolak', {
+            description: `Harap login terlebih dahulu.`
+          })
+          navigate('/login')
+
+          return Promise.reject(refreshError)
+        }
       }
 
       // Skip logging untuk GET errors (kecuali error penting)
       if (method === 'GET') {
-        // Hanya log GET errors untuk status error tertentu
-        if (status !== 200 || !error.response) {
+        if (status === 401 || !error.response) {
           LoggerService.error(
             'AxiosInstance.Response',
             `Error ${method} ${url} - Status: ${status || 'No Response'}`,
@@ -162,7 +239,6 @@ export const useAxiosInstance = (): AxiosInstance => {
             }
           )
         }
-        // Untuk GET errors lainnya, skip logging
         return Promise.reject(error)
       }
 
@@ -194,22 +270,8 @@ export const useAxiosInstance = (): AxiosInstance => {
         }
       )
 
-      // Handle different error statuses
-      if (status === 401) {
-        LoggerService.warn('AxiosInstance.Auth', 'Unauthorized access - redirecting to login', {
-          reason: 'Token expired or invalid',
-          actions: 'Clearing storage and redirecting',
-          meta: {
-            page: pageInfo,
-            previousPage: location.pathname
-          }
-        })
-        localStorage.clear()
-        toast.warning('Akses Ditolak', {
-          description: `Harap login terlebih dahulu.`
-        })
-        navigate('/login')
-      } else if (status === 403) {
+      // Handle different error statuses (selain 401 yang sudah dihandle di atas)
+      if (status === 403) {
         LoggerService.warn('AxiosInstance.Auth', 'Forbidden access - user lacks permission', {
           url: error.config?.url,
           method: method,
@@ -219,7 +281,7 @@ export const useAxiosInstance = (): AxiosInstance => {
           }
         })
         toast.warning('Akses Ditolak', {
-          description: `Anda tidak memiliki izin untuk halaman ini.`
+          description: `'Anda tidak memiliki izin untuk halaman ini.`
         })
       } else if (status === 500) {
         LoggerService.error('AxiosInstance.Server', 'Internal server error', {
@@ -229,8 +291,7 @@ export const useAxiosInstance = (): AxiosInstance => {
             page: pageInfo
           }
         })
-        navigate('/login')
-        toast.error('Kesalahan Server', {
+        toast.warning('Kesalahan Server', {
           description: `Terjadi kesalahan di server, coba lagi nanti.`
         })
       } else if (!error.response) {
@@ -241,9 +302,8 @@ export const useAxiosInstance = (): AxiosInstance => {
             page: pageInfo
           }
         })
-        navigate('/login')
-        toast.error('Koneksi Gagal', {
-          description: `Tidak dapat terhubung ke server.`
+        toast.warning('Koneksi Gagal', {
+          description: `Tidak dapat terhubung ke server, periksa koneksi Anda.`
         })
       } else {
         // Log other HTTP errors untuk non-GET methods

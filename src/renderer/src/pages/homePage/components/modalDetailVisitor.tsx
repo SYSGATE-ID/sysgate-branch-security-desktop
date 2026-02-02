@@ -138,7 +138,7 @@ export const ModalDetailVisitor: React.FC<ModalProps> = ({
                   Dokumen
                 </h3>
                 <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
-                  {selectedData.pictures.length > 0 ? (
+                  {selectedData.pictures && selectedData.pictures.length > 0 ? (
                     selectedData.pictures.map((item, index) => (
                       <img
                         key={index}

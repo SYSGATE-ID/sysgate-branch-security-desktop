@@ -1,5 +1,5 @@
 // File: src/renderer/components/Sidebar.tsx
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Tooltip,
   TooltipContent,
@@ -11,6 +11,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { useNavigate } from 'react-router-dom'
 import { useConfigStore } from '@renderer/store/configProvider'
 import { useTheme } from './ThemeProvider'
+import AppConfigService from '@renderer/store/appConfigService'
 
 const navItems = [
   { id: 'home', label: 'Home', icon: Home, link: '/' },
@@ -31,11 +32,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab = 'home', onTabChang
   const [active, setActive] = useState(activeTab)
   const { assetsPathConfig } = useConfigStore()
 
+  const appConfigService = AppConfigService()
+
   const handleTabClick = (tabId: string, link: string): void => {
     setActive(tabId)
     onTabChange?.(tabId)
     navigate(link)
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const fetchInit = async () => {
+      try {
+        await Promise.all([appConfigService.getAllAppConfig()])
+        if (!localStorage.getItem('hasReloaded')) {
+          localStorage.setItem('hasReloaded', 'true')
+          window.location.reload()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchInit()
+  }, [])
 
   return (
     <TooltipProvider delayDuration={0}>
