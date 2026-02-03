@@ -12,6 +12,7 @@ import {
 import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Label } from '@renderer/components/ui/label'
+import { passwordLocalConfig } from '@renderer/utils/config'
 
 interface TitleBarProps {
   title?: string
@@ -105,7 +106,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   }, [])
 
   const handlePasswordSubmit = (): void => {
-    if (password === 'admin123') {
+    if (password === passwordLocalConfig) {
       setShowPasswordModal(false)
       setShowConfigModal(true)
       setPassword('')
