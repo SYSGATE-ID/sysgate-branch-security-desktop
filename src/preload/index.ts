@@ -68,6 +68,10 @@ const api = {
 
   removeAllListeners: (channel: string): void => {
     ipcRenderer.removeAllListeners(channel)
+  },
+
+  getAppVersion: async (): Promise<string> => {
+    return await ipcRenderer.invoke('get-app-version')
   }
 }
 

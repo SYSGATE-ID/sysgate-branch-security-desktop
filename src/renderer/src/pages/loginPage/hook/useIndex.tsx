@@ -9,15 +9,8 @@ import { UseGlobalLayout } from '@renderer/components/core/hook/useGlobalLayout'
 import { LoggerService } from '@renderer/services/loggerService'
 import { useWindowInfo } from '@renderer/store/useWindowInfo'
 
-interface UseIndexReturn {
-  formLogin: IPayloadLogin
-  handleChange: (e: ChangeEvent<HTMLInputElement>) => void
-  handleLogin: (e: FormEvent<HTMLFormElement>) => Promise<void>
-  loading: { submit: boolean }
-  errorFormLogin: Record<string, string>
-}
-
-export const useIndex = (): UseIndexReturn => {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const useIndex = () => {
   const token = localStorage.getItem('token')
   const { currentWindowType, isMainWindow } = useWindowInfo()
   // const navigate = useNavigate()
@@ -30,6 +23,17 @@ export const useIndex = (): UseIndexReturn => {
 
   const [errorFormLogin, setErrorFormLogin] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState<{ submit: boolean }>({ submit: false })
+  const [appVersion, setAppVersion] = useState<string>('')
+
+  useEffect(() => {
+    const fetchVersion = async (): Promise<void> => {
+      if (window.api && window.api.getAppVersion) {
+        const version = await window.api.getAppVersion()
+        setAppVersion(version)
+      }
+    }
+    fetchVersion()
+  }, [])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target
@@ -127,6 +131,7 @@ export const useIndex = (): UseIndexReturn => {
     handleChange,
     handleLogin,
     loading,
-    errorFormLogin
+    errorFormLogin,
+    appVersion
   }
 }

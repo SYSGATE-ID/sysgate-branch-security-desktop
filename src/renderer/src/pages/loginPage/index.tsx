@@ -14,7 +14,7 @@ import logo from '@public/assets/images/logo.png'
 import { useIndex } from './hook/useIndex'
 
 export const LoginPage: React.FC = () => {
-  const { formLogin, handleChange, handleLogin, loading, errorFormLogin } = useIndex()
+  const { formLogin, handleChange, handleLogin, loading, errorFormLogin, appVersion } = useIndex()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -109,6 +109,12 @@ export const LoginPage: React.FC = () => {
               )}
             </Button>
           </form>
+
+          {appVersion && (
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500">Version {appVersion}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

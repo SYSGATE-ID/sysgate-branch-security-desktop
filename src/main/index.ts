@@ -225,6 +225,10 @@ ipcMain.handle('clear-localstorage', async () => {
   })
 })
 
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion()
+})
+
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
 

@@ -10,6 +10,7 @@ declare global {
       getMyConfig: () => Promise<IConfigAsset>
       getImage: () => Promise<string>
       getImageBase64: (filename: string) => Promise<string>
+      getAppVersion: () => Promise<string>
       windowControl: {
         minimize: () => void
         maximize: () => void
