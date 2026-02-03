@@ -9,6 +9,9 @@ import {
   DialogFooter
 } from '@renderer/components/ui/dialog'
 import { Button } from '@renderer/components/ui/button'
+import { Input } from '@renderer/components/ui/input'
+import { Label } from '@renderer/components/ui/label'
+import { useConfigStore } from '@renderer/store/configProvider'
 
 interface TitleBarProps {
   title?: string
@@ -18,10 +21,30 @@ interface TitleBarProps {
 }
 
 export const LoginTitleBar: React.FC<TitleBarProps> = ({ username = '' }) => {
-  const { deviceId, showModal, setShowModal } = UseGlobalLayout()
+  const { config } = useConfigStore()
+  const {
+    deviceId,
+    showModal,
+    setShowModal,
+    showPasswordModal,
+    setShowPasswordModal,
+    showConfigModal,
+    setShowConfigModal
+  } = UseGlobalLayout()
 
   // === State Modal Close Confirm ===
   const [showConfirmClose, setShowConfirmClose] = useState(false)
+
+  // === State Password ===
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+
+  // === State Config Form ===
+  const [localConfig, setLocalConfig] = useState({
+    apiUrl: config?.api_url,
+    wsUrl: config?.ws_url,
+    license: config?.license
+  })
 
   // === Trigger open dialog, tidak langsung close ===
   const handleCloseClick = (): void => {
@@ -32,6 +55,28 @@ export const LoginTitleBar: React.FC<TitleBarProps> = ({ username = '' }) => {
   const confirmClose = (): void => {
     localStorage.clear()
     window.electron?.ipcRenderer.send('window-close')
+  }
+
+  const handlePasswordSubmit = (): void => {
+    if (password === 'Sistem112233') {
+      setShowPasswordModal(false)
+      setShowConfigModal(true)
+      setPassword('')
+      setPasswordError('')
+    } else {
+      setPasswordError('Password salah!')
+    }
+  }
+
+  const handleSaveConfig = (): void => {
+    const newConfig = {
+      api_url: localConfig.apiUrl,
+      ws_url: localConfig.wsUrl,
+      license: localConfig.license
+    }
+    localStorage.setItem('localConfig', JSON.stringify(newConfig))
+    setShowConfigModal(false)
+    window.location.reload()
   }
 
   return (
@@ -127,6 +172,128 @@ export const LoginTitleBar: React.FC<TitleBarProps> = ({ username = '' }) => {
             <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={confirmClose}>
               Keluar
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PASSWORD MODAL */}
+      <Dialog
+        open={showPasswordModal}
+        onOpenChange={(open) => {
+          setShowPasswordModal(open)
+          if (!open) {
+            setPassword('')
+            setPasswordError('')
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">Masukkan Password</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Masukkan password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setPasswordError('')
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handlePasswordSubmit()
+                  }
+                }}
+                className="w-full"
+                autoFocus
+              />
+              {passwordError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{passwordError}</p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPasswordModal(false)
+                setPassword('')
+                setPasswordError('')
+              }}
+            >
+              Batal
+            </Button>
+
+            <Button onClick={handlePasswordSubmit}>Lanjutkan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* CONFIG MODAL */}
+      <Dialog open={showConfigModal} onOpenChange={setShowConfigModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">Konfigurasi Aplikasi</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="api_url" className="text-sm font-medium">
+                API URL
+              </Label>
+              <Input
+                id="api_url"
+                type="text"
+                placeholder="https://api.example.com"
+                value={localConfig.apiUrl}
+                onChange={(e) => setLocalConfig({ ...localConfig, apiUrl: e.target.value })}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ws_url" className="text-sm font-medium">
+                WebSocket URL
+              </Label>
+              <Input
+                id="ws_url"
+                type="text"
+                placeholder="https://api.example.com/ws"
+                value={localConfig.wsUrl}
+                onChange={(e) => setLocalConfig({ ...localConfig, wsUrl: e.target.value })}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="license" className="text-sm font-medium">
+                License
+              </Label>
+              <Input
+                id="license"
+                type="text"
+                placeholder="1234567890"
+                value={localConfig.license}
+                onChange={(e) => setLocalConfig({ ...localConfig, license: e.target.value })}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="mt-6 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowConfigModal(false)}>
+              Batal
+            </Button>
+
+            <Button onClick={handleSaveConfig}>Simpan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

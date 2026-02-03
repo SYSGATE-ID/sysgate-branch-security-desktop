@@ -1,9 +1,10 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { readFileSync } from 'fs'
 import nodeChildProcess from 'child_process'
+import { autoUpdater } from 'electron-updater'
 
 let mainWindow: BrowserWindow | null = null
 let loginWindow: BrowserWindow | null = null
@@ -12,9 +13,7 @@ function clearAllLocalStorage(): void {
   const windows = BrowserWindow.getAllWindows()
   windows.forEach((win) => {
     if (!win.isDestroyed()) {
-      win.webContents.executeJavaScript('localStorage.clear()').catch(() => {
-        // Ignore errors jika window sudah dihancurkan
-      })
+      win.webContents.executeJavaScript('localStorage.clear()').catch(() => {})
     }
   })
   console.log('LocalStorage cleared from all windows')
@@ -24,11 +23,9 @@ ipcMain.handle('get-window-info', (event) => {
   const window = BrowserWindow.fromWebContents(event.sender)
   if (!window) return null
 
-  // Mendapatkan URL/window title untuk identifikasi
   const url = window.webContents.getURL()
   const title = window.getTitle()
 
-  // Mendeteksi window type berdasarkan URL atau properti lain
   let windowType = 'unknown'
 
   if (url.includes('/login') || title.includes('Login')) {
@@ -37,7 +34,6 @@ ipcMain.handle('get-window-info', (event) => {
     windowType = 'main'
   }
 
-  // Atau gunakan id window yang sudah kita ketahui
   if (window === loginWindow) {
     windowType = 'login'
   } else if (window === mainWindow) {
@@ -56,13 +52,11 @@ ipcMain.handle('get-window-info', (event) => {
 })
 
 function createLoginWindow(): void {
-  // Jika login window sudah ada, focus dan return
   if (loginWindow) {
     loginWindow.focus()
     return
   }
 
-  // Create login window
   loginWindow = new BrowserWindow({
     width: 450,
     height: 550,
@@ -88,14 +82,13 @@ function createLoginWindow(): void {
 
   loginWindow.on('closed', () => {
     loginWindow = null
-    // Jika login window ditutup dan main window belum ada, tutup app
+
     if (!mainWindow) {
       clearAllLocalStorage()
       app.quit()
     }
   })
 
-  // HMR for renderer base on electron-vite cli.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/login')
   } else {
@@ -110,13 +103,11 @@ function createLoginWindow(): void {
 }
 
 function createMainWindow(): void {
-  // Jika main window sudah ada, focus dan return
   if (mainWindow) {
     mainWindow.focus()
     return
   }
 
-  // Create the main browser window.
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -142,7 +133,7 @@ function createMainWindow(): void {
 
   mainWindow.on('closed', () => {
     mainWindow = null
-    // Jika main window ditutup, buka login window
+
     if (!loginWindow) {
       createLoginWindow()
     }
@@ -153,7 +144,6 @@ function createMainWindow(): void {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -161,7 +151,6 @@ function createMainWindow(): void {
   }
 }
 
-// IPC handlers untuk semua window
 ipcMain.on('window-minimize', (event) => {
   const window = BrowserWindow.fromWebContents(event.sender)
   window?.minimize()
@@ -182,24 +171,19 @@ ipcMain.on('window-close', (event) => {
   window?.close()
 })
 
-// Handler untuk login berhasil
 ipcMain.on('login-success', () => {
-  // Tutup login window dan buka main window
   loginWindow?.close()
   loginWindow = null
   createMainWindow()
 })
 
-// Handler untuk logout
 ipcMain.on('logout', () => {
-  // Tutup main window dan buka login window
   clearAllLocalStorage()
   mainWindow?.close()
   mainWindow = null
   createLoginWindow()
 })
 
-// IPC handlers lainnya (get-my-config, get-assets-path, get-deviceID) tetap sama
 ipcMain.handle('get-my-config', async () => {
   try {
     const jsonPath = is.dev
@@ -241,28 +225,93 @@ ipcMain.handle('clear-localstorage', async () => {
   })
 })
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
 app.whenReady().then(() => {
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  // Buat login window pertama kali
   createLoginWindow()
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createLoginWindow()
   })
+})
+
+// Event dari tombol "Cek Update"
+ipcMain.on('check-for-updates', () => {
+  // Cek apakah dalam mode development
+  if (is.dev) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send(
+        'update:notification',
+        'Aplikasi dalam mode development. Auto-update hanya tersedia untuk versi production yang sudah di-package.',
+        'info'
+      )
+    }
+    return
+  }
+
+  autoUpdater.checkForUpdates()
+})
+
+// Konfigurasi auto update
+autoUpdater.autoDownload = false
+
+autoUpdater.on('update-not-available', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send(
+      'update:notification',
+      'Aplikasi Anda sudah menggunakan versi terbaru.',
+      'latest'
+    )
+  }
+})
+
+autoUpdater.on('update-available', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('update:notification', 'Update tersedia dan siap diunduh.', 'info')
+    dialog
+      .showMessageBox(mainWindow as BrowserWindow, {
+        type: 'info',
+        title: 'Update tersedia',
+        message: 'Versi baru tersedia. Mau download sekarang?',
+        buttons: ['Ya', 'Nanti']
+      })
+      .then((result) => {
+        if (result.response === 0) {
+          autoUpdater.downloadUpdate()
+        }
+      })
+  }
+})
+
+autoUpdater.on('download-progress', (progressObj) => {
+  const progress = Math.round(progressObj.percent)
+  if (mainWindow) {
+    mainWindow.webContents.send('update:download-progress', progress)
+  }
+})
+
+autoUpdater.on('update-downloaded', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send(
+      'update:notification',
+      'Update berhasil diunduh dan siap diinstall.',
+      'info'
+    )
+    dialog
+      .showMessageBox(mainWindow, {
+        title: 'Update Siap',
+        message: 'Update telah diunduh. Aplikasi akan restart untuk update.'
+      })
+      .then(() => {
+        autoUpdater.quitAndInstall()
+      })
+  }
 })
 
 app.on('before-quit', () => {
@@ -283,7 +332,6 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Handle uncaught exceptions dan crashes
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error)
   clearAllLocalStorage()
@@ -296,7 +344,6 @@ process.on('unhandledRejection', (reason, promise) => {
   app.quit()
 })
 
-// Handle SIGTERM dan SIGINT signals (untuk graceful shutdown)
 process.on('SIGTERM', () => {
   console.log('Received SIGTERM, clearing localStorage...')
   clearAllLocalStorage()

@@ -10,7 +10,11 @@ import {
   ItemMedia,
   ItemTitle
 } from '@renderer/components/ui/item'
-import { convertStatusLogGate, formatDateTime } from '@renderer/utils/myFunctions'
+import {
+  convertStatusLogGate,
+  formatDateTime,
+  getValueAppConfig
+} from '@renderer/utils/myFunctions'
 import { RefreshCcw, Ticket, User } from 'lucide-react'
 import React from 'react'
 import { ModalDetailVisitor } from './modalDetailVisitor'
@@ -137,34 +141,36 @@ export const DashboardParking: React.FC = () => {
               <h2 className="text-base font-bold text-blue-900 dark:text-white">
                 Data Statistik Hari Ini
               </h2>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-40 ml-2"
-                onClick={() => connectWebSocket()}
-              >
-                Re-Connect Gate
-              </Button>
+              {getValueAppConfig('CAN-MANUAL-APPROVAL') && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-40 ml-2"
+                  onClick={() => connectWebSocket()}
+                >
+                  Re-Connect Gate
+                </Button>
+              )}
             </div>
 
             <div className="grid grid-cols-2 p-5 gap-6">
               {/* Status Di Dalam */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700/50 hover:-translate-y-1">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700/50 hover:-translate-y-1">
                 <div className="flex items-center justify-between w-full">
                   <div>
                     <div className="text-slate-600 dark:text-slate-400 text-sm font-medium">
                       Status Di Dalam
                     </div>
-                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
                       24
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Kendaraan aktif di area parkir
                     </div>
                   </div>
-                  <div className="bg-blue-200/50 dark:bg-blue-700/30 p-4 rounded-xl">
+                  <div className="bg-green-200/50 dark:bg-green-700/30 p-4 rounded-xl">
                     <svg
-                      className="w-8 h-8 text-blue-600 dark:text-blue-400"
+                      className="w-8 h-8 text-green-600 dark:text-green-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -181,22 +187,22 @@ export const DashboardParking: React.FC = () => {
               </div>
 
               {/* Status Di Luar */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700/50 hover:-translate-y-1">
+              <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-slate-200 dark:border-slate-700/50 hover:-translate-y-1">
                 <div className="flex items-center justify-between w-full">
                   <div>
                     <div className="text-slate-600 dark:text-slate-400 text-sm font-medium">
                       Status Di Luar
                     </div>
-                    <div className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
+                    <div className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">
                       156
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Total kendaraan keluar hari ini
                     </div>
                   </div>
-                  <div className="bg-green-200/50 dark:bg-green-700/30 p-4 rounded-xl">
+                  <div className="bg-red-200/50 dark:bg-red-700/30 p-4 rounded-xl">
                     <svg
-                      className="w-8 h-8 text-green-600 dark:text-green-400"
+                      className="w-8 h-8 text-red-600 dark:text-red-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

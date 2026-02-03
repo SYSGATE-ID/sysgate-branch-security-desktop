@@ -11,6 +11,8 @@ export const UseGlobalLayout = () => {
 
   const [deviceId, setDeviceId] = useState<string>('')
   const [showModal, setShowModal] = useState<boolean>(false)
+  const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false)
+  const [showConfigModal, setShowConfigModal] = useState<boolean>(false)
   const [licenseIs, setLicenseIs] = useState<boolean>(false)
 
   const checkIDDevice = async (): Promise<void> => {
@@ -27,7 +29,7 @@ export const UseGlobalLayout = () => {
     window.electron.ipcRenderer.once('uuid-response', handleResponse)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       secLicense = getDigitMD5Serial(recursiveMD5('25SYSGATEE#PT' + secProductId + 'ELECTRONN', 10))
       if (secLicense === myLicense) {
@@ -63,7 +65,13 @@ export const UseGlobalLayout = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F12') {
         e.preventDefault()
-        setShowModal(true)
+        if (e.ctrlKey && e.shiftKey) {
+          // Ctrl+Shift+F12 -> Password Modal dulu
+          setShowPasswordModal(true)
+        } else {
+          // F12 -> Device ID Modal
+          setShowModal(true)
+        }
       }
 
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') {
@@ -76,5 +84,14 @@ export const UseGlobalLayout = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  return { deviceId, showModal, setShowModal, licenseIs }
+  return {
+    deviceId,
+    showModal,
+    setShowModal,
+    showPasswordModal,
+    setShowPasswordModal,
+    showConfigModal,
+    setShowConfigModal,
+    licenseIs
+  }
 }

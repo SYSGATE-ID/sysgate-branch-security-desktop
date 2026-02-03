@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ILogData } from '@interface/config.interface'
 import { loggerDB } from '@renderer/db/loggerDB'
+import { withLocalLogger } from '@renderer/utils/config'
 
 const safeSerialize = (value: unknown): string => {
   try {
@@ -142,23 +143,25 @@ const getClientInfo = async (): Promise<{
 const saveLog = async (data: ILogData): Promise<void> => {
   try {
     // Dapatkan informasi client
-    const clientInfo = await getClientInfo()
+    if (withLocalLogger) {
+      const clientInfo = await getClientInfo()
 
-    const cleaned = {
-      ...data,
-      request: data.request ? safeSerialize(data.request) : undefined,
-      payload: data.payload ? safeSerialize(data.payload) : undefined,
-      response: data.response ? safeSerialize(data.response) : undefined,
-      meta: data.meta
-        ? {
-            ...(typeof data.meta === 'object' ? data.meta : {}),
-            client: clientInfo
-          }
-        : { client: clientInfo },
-      created_at: new Date().toISOString()
+      const cleaned = {
+        ...data,
+        request: data.request ? safeSerialize(data.request) : undefined,
+        payload: data.payload ? safeSerialize(data.payload) : undefined,
+        response: data.response ? safeSerialize(data.response) : undefined,
+        meta: data.meta
+          ? {
+              ...(typeof data.meta === 'object' ? data.meta : {}),
+              client: clientInfo
+            }
+          : { client: clientInfo },
+        created_at: new Date().toISOString()
+      }
+
+      await loggerDB.logs.add(cleaned)
     }
-
-    await loggerDB.logs.add(cleaned)
   } catch (error) {
     console.error('Failed to save log:', error)
   }
