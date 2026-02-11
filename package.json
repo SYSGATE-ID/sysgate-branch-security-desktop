@@ -1,6 +1,6 @@
 {
   "name": "sysgate-desktop",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Sysgate Desktop Application",
   "main": "./out/main/index.js",
   "author": "example.com",

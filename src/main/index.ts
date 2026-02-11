@@ -13,7 +13,7 @@ function clearAllLocalStorage(): void {
   const windows = BrowserWindow.getAllWindows()
   windows.forEach((win) => {
     if (!win.isDestroyed()) {
-      win.webContents.executeJavaScript('localStorage.clear()').catch(() => {})
+      win.webContents.executeJavaScript('localStorage.removeItem("userLogin")').catch(() => {})
     }
   })
   console.log('LocalStorage cleared from all windows')
@@ -167,7 +167,7 @@ ipcMain.on('window-maximize', (event) => {
 
 ipcMain.on('window-close', (event) => {
   const window = BrowserWindow.fromWebContents(event.sender)
-  window?.webContents.executeJavaScript('localStorage.clear()')
+  window?.webContents.executeJavaScript('localStorage.removeItem("userLogin")')
   window?.close()
 })
 
@@ -259,7 +259,7 @@ ipcMain.on('get-deviceID', (event) => {
 ipcMain.handle('clear-localstorage', async () => {
   const windows = BrowserWindow.getAllWindows()
   windows.forEach((win) => {
-    win.webContents.executeJavaScript('localStorage.clear()')
+    win.webContents.executeJavaScript('localStorage.removeItem(userLogin)')
   })
 })
 

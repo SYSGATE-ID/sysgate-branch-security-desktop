@@ -437,3 +437,13 @@ export const getValueAppConfig = (key: AppConfigKey): string | number | boolean 
     return null
   }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const clearLocalStorageExcept = (keysToKeep: any[] = []): void => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Object.keys(localStorage).forEach((key: any) => {
+    if (!keysToKeep.includes(key)) {
+      localStorage.removeItem(key)
+    }
+  })
+}

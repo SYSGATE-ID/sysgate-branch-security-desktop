@@ -11,6 +11,7 @@ import { useTableInstance } from '@renderer/components/core/useTableDataInstance
 import { AxiosError } from 'axios'
 import { IErrorResponse } from '@renderer/interface/response.interface'
 import {
+  clearLocalStorageExcept,
   convertStatusTicket,
   formatDateTime,
   generateStats,
@@ -565,7 +566,7 @@ Terima kasih.
 
   useEffect(() => {
     if (currentWindowType === 'login') {
-      localStorage.clear()
+      clearLocalStorageExcept(['localConfig'])
       navigate('/login')
     }
   }, [currentWindowType, isMainWindow])

@@ -13,6 +13,7 @@ import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Label } from '@renderer/components/ui/label'
 import { passwordLocalConfig } from '@renderer/utils/config'
+import { clearLocalStorageExcept } from '@renderer/utils/myFunctions'
 
 interface TitleBarProps {
   title?: string
@@ -74,7 +75,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
 
   // === Confirm action ===
   const confirmClose = (): void => {
-    localStorage.clear()
+    clearLocalStorageExcept(['localConfig'])
     window.electron?.ipcRenderer.send('window-close')
   }
 

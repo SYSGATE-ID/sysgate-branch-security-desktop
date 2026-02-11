@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useConfigStore } from '@renderer/store/configProvider'
+import { clearLocalStorageExcept } from '@renderer/utils/myFunctions'
 import { LoggerService } from '@services/loggerService'
 import axios from 'axios'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -199,7 +200,7 @@ export const useAxiosInstance = () => {
             }
           })
 
-          localStorage.clear()
+          clearLocalStorageExcept(['localConfig'])
           toast.warning('Akses Ditolak', {
             description: `Harap login terlebih dahulu.`
           })
