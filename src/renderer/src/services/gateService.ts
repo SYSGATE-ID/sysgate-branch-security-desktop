@@ -38,7 +38,7 @@ const GateService = (): GateService => {
 
   const getAllLogGate = async (params?: object): Promise<IResponse<ILogGate[]>> => {
     try {
-      const response: AxiosResponse<IResponse<ILogGate[]>> = await axiosInstance.get(`/gate/logs`, {
+      const response: AxiosResponse<IResponse<ILogGate[]>> = await axiosInstance.get(`/gate-log`, {
         params
       })
       return response.data

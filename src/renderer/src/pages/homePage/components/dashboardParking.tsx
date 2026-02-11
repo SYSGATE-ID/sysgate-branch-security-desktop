@@ -40,7 +40,8 @@ export const DashboardParking: React.FC = () => {
     handleActionConfirm,
     dataFromWS,
     fetchLogGate,
-    connectWebSocket
+    connectWebSocket,
+    memberCounter
   } = useIndex()
 
   return (
@@ -162,7 +163,7 @@ export const DashboardParking: React.FC = () => {
                       Status Di Dalam
                     </div>
                     <div className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
-                      24
+                      {memberCounter?.member.inside || 0}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Kendaraan aktif di area parkir
@@ -194,7 +195,7 @@ export const DashboardParking: React.FC = () => {
                       Status Di Luar
                     </div>
                     <div className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">
-                      156
+                      {memberCounter?.member.outside || 0}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Total kendaraan keluar hari ini

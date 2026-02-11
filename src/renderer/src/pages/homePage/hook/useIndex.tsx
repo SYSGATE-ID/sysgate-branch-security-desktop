@@ -29,6 +29,10 @@ import { useConfigStore } from '@renderer/store/configProvider'
 import { WsResponseAction } from '@renderer/interface/ws.interface'
 import { useWindowInfo } from '@renderer/store/useWindowInfo'
 import { useNavigate } from 'react-router-dom'
+interface IVisitorCounter {
+  inside: number
+  outside: number
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useIndex = () => {
@@ -43,6 +47,11 @@ export const useIndex = () => {
   const visitorService = VisitorService()
   const gateService = GateService()
   const [statistic, setStatistic] = useState<IDashboardData | null>(null)
+  const [memberCounter, setMemberCounter] = useState<{
+    member: IVisitorCounter
+    ticket: IVisitorCounter
+    all: IVisitorCounter
+  } | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const [data, setData] = useState<IVisitor[]>([])
   const [logGates, setLogGates] = useState<ILogGate[]>([])
@@ -118,9 +127,6 @@ export const useIndex = () => {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
-
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const eventSource = useSSEInstance('/events/statistic/listen')
 
@@ -145,6 +151,34 @@ export const useIndex = () => {
 
     eventSource.onerror = (err) => {
       console.error('EventSource error dashboard:', err)
+      eventSource.close()
+    }
+
+    return () => eventSource.close()
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const eventSource = useSSEInstance('/events/statistic/listen-visitor-counter')
+
+    eventSource.addEventListener('update-statistic', (event) => {
+      try {
+        const payload: IResponseDashboard<{
+          member: IVisitorCounter
+          ticket: IVisitorCounter
+          all: IVisitorCounter
+        }> = JSON.parse(event.data)
+
+        if (payload.type === 'DASHBOARD_STATISTIC_UPDATE_VISITOR_COUNTER' && payload.data) {
+          setMemberCounter(payload.data)
+        }
+      } catch (err) {
+        console.error('Gagal parse SSE visitor counter:', err)
+      }
+    })
+
+    eventSource.onerror = (err) => {
+      console.error('EventSource error visitor counter:', err)
       eventSource.close()
     }
 
@@ -561,6 +595,7 @@ Terima kasih.
     isWsConnected: ws.current?.readyState === WebSocket.OPEN,
     dataFromWS,
     fetchLogGate,
-    connectWebSocket
+    connectWebSocket,
+    memberCounter
   }
 }

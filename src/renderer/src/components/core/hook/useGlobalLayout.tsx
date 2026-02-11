@@ -32,6 +32,8 @@ export const UseGlobalLayout = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       secLicense = getDigitMD5Serial(recursiveMD5('25SYSGATEE#PT' + secProductId + 'ELECTRONN', 10))
+      // console.log(secLicense)
+
       if (secLicense === myLicense) {
         setLicenseIs(true)
       } else {
