@@ -166,11 +166,7 @@ export const useAxiosInstance = () => {
             { withCredentials: true }
           )
 
-          const newToken = refreshResponse.data?.data?.token
-
-          if (newToken) {
-            localStorage.setItem('token', newToken)
-
+          if (refreshResponse.status === 200) {
             LoggerService.info('AxiosInstance.Auth', 'Token refreshed successfully', {
               meta: {
                 page: pageInfo

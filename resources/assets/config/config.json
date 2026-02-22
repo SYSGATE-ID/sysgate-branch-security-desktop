@@ -1,5 +1,5 @@
 {
-  "api_url": "https://api.azzahrawardani.my.id",
+  "api_url": "http://localhost:3000",
   "ws_url": "https://api.azzahrawardani.my.id/ws",
   "license": "7388878448"
 }

@@ -90,11 +90,15 @@ export const useIndex = () => {
         })
       }
     } catch (error) {
-      const axiosError = error as AxiosError<IErrorResponse>
+      const axiosError = error as AxiosError<IErrorResponse>;
       const message = axiosError.response?.data?.error || 'Terjadi kesalahan pada server!'
-      toast.error('Login Gagal', {
-        description: message as string
-      })
+      console.log('asdasd', error)
+
+      if (axiosError.status === 401) {
+        toast.error('Login Gagal', { description: message as string })
+      } else {
+        toast.error('Login Gagal', { description: 'Terjadi kesalahan pada server!' })
+      }
     } finally {
       setFormLogin({ username: '', password: '' })
       setLoading({ submit: false })

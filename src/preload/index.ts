@@ -16,6 +16,13 @@ interface WindowInfo {
 
 // Custom APIs for renderer
 const api = {
+  device: {
+    deviceName: async () => await ipcRenderer.invoke('get-device-label'),
+    deviceUuid: async () => await ipcRenderer.invoke('get-device-uuid'),
+    deviceBrand: async () => await ipcRenderer.invoke('get-device-brand'),
+    deviceInfo: async () => await ipcRenderer.invoke('get-device-info')
+  },
+
   getMyConfig: async () => {
     return await ipcRenderer.invoke('get-my-config')
   },
@@ -23,8 +30,8 @@ const api = {
   getImage: async (): Promise<string> => {
     return await ipcRenderer.invoke('get-assets-path')
   },
-  
-  getImageBase64: async (filename: string): Promise<string> => 
+
+  getImageBase64: async (filename: string): Promise<string> =>
     ipcRenderer.invoke('get-image-base64', filename),
 
   // Tambahkan IPC handlers untuk window control dan auth

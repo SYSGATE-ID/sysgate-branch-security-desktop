@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/electron.d.ts atau preload/index.d.ts
 import { ElectronAPI } from '@electron-toolkit/preload'
 import { WindowInfo } from '@renderer/interface/config.interface'
@@ -7,6 +8,12 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
+      device: {
+        deviceName: () => Promise<string>
+        deviceUuid: () => Promise<string>
+        deviceBrand: () => Promise<string>
+        deviceInfo: () => Promise<any>
+      }
       getMyConfig: () => Promise<IConfigAsset>
       getImage: () => Promise<string>
       getImageBase64: (filename: string) => Promise<string>

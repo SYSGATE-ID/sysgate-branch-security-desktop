@@ -8,6 +8,8 @@ import type {
 import type { IResponse } from '@interface/response.interface'
 import { useNavigate } from 'react-router-dom'
 import { LoggerService } from './loggerService'
+import axios from 'axios'
+import { useConfigStore } from '@renderer/store/configProvider'
 
 interface AuthService {
   loginAuth: (data: IPayloadLogin) => Promise<IResponse<IResponseLogin>>
@@ -17,6 +19,8 @@ interface AuthService {
 }
 
 const AuthService = (): AuthService => {
+  const { config } = useConfigStore.getState() // langsung akses tanpa hook
+  const baseURL = config?.api_url || 'http://localhost/3003'
   const axiosInstance = useAxiosInstance()
   const navigate = useNavigate()
 
@@ -25,9 +29,14 @@ const AuthService = (): AuthService => {
 
   const loginAuth = async (data: IPayloadLogin): Promise<IResponse<IResponseLogin>> => {
     try {
-      const response = await axiosInstance.post<IResponse<IResponseLogin>>(`/auth/login`, data)
+      const response = await axios.post<IResponse<IResponseLogin>>(
+        `${baseURL}/api/v1/auth/login`,
+        data,
+        { withCredentials: true }
+      )
       return response.data
     } catch (error) {
+      console.log('Login Gagal', `Error saat login: `, error)
       console.error(error)
       throw error
     }
